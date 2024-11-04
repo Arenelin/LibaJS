@@ -1,0 +1,22 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@it-incubator/libajs':
+        specifier: ^0.0.6
+        version: 0.0.6
+
+packages:
+
+  '@it-incubator/libajs@0.0.6':
+    resolution: {integrity: sha512-5IO5DKdZg3+0SeYrUo4AuG1NRqJWvtY9XL8osCLFQThw8nhsqNbCuEoeXD5SbIfRa3BJ2D3YK409H0wyMspKwQ==}
+
+snapshots:
+
+  '@it-incubator/libajs@0.0.6': {}
