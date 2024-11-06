@@ -2,6 +2,8 @@ export function TaskComponent(props) {
     const element = document.createElement('li')
     console.log('Task mount')
 
+    TaskComponent.render({element, props})
+
     return {
         element,
         props
@@ -9,6 +11,7 @@ export function TaskComponent(props) {
 }
 
 TaskComponent.render = ({element, props}) => {
+    element.innerHTML = ''
     element.append(props.task.title)
     const checkbox = document.createElement('input')
     checkbox.type = 'checkbox'

@@ -1,4 +1,4 @@
-export function CounterComponent(_, {liba}) {
+export function CounterComponent() {
     const element = document.createElement('div')
 
     const localState = {
@@ -7,8 +7,10 @@ export function CounterComponent(_, {liba}) {
     console.log('Counter mount')
     const intervalId = setInterval(() => {
         localState.value++
-        liba.refresh()
+        CounterComponent.render({element, localState})
     }, 1000)
+
+    CounterComponent.render({element, localState})
 
     return {
         element,
@@ -20,6 +22,7 @@ export function CounterComponent(_, {liba}) {
 }
 
 CounterComponent.render = ({element, localState}) => {
+    element.innerHTML = ''
     element.append(localState.value)
     console.log('Counter re-render')
 }

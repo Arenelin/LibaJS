@@ -1,6 +1,6 @@
 import {TaskComponent} from "./Task.component.js";
 
-export function TodolistComponent(_, {liba}) {
+export function TodolistComponent() {
     const element = document.createElement('ul')
     console.log('Todolist mount')
 
@@ -15,9 +15,11 @@ export function TodolistComponent(_, {liba}) {
                 .map(t => t.id === id
                     ? {...t, isDone: newIsDoneValue}
                     : t)
-            liba.refresh()
-        }
+            TodolistComponent.render({element, localState})
+        },
+        childrenComponents: []
     }
+    TodolistComponent.render({element, localState})
 
     return {
         element,
@@ -25,12 +27,52 @@ export function TodolistComponent(_, {liba}) {
     }
 }
 
-TodolistComponent.render = ({element, localState, liba}) => {
+TodolistComponent.render = ({element, localState}) => {
+    element.innerHTML = ''
+    localState.childrenComponents.forEach(cc => cc.cleanup?.())
+
     const header = document.createElement('h1')
     header.append('Todolist page')
     element.append(header)
 
     console.log('Todolist re-render')
-    localState.tasks.forEach((task) =>
-        element.append(liba.create(TaskComponent, {task, setIsDone: localState.setIsDone}).element))
+    localState.tasks.forEach((task, i) => {
+        const alreadyExistedComponent = localState.childrenComponents[i]
+        if (alreadyExistedComponent) {
+            if (!isSameProps(alreadyExistedComponent.props.task, localState.tasks[i])) {
+                const newProps = {task: localState.tasks[i], setIsDone: localState.setIsDone}
+                TaskComponent.render({
+                    element: alreadyExistedComponent.element,
+                    props: newProps
+                })
+                localState.childrenComponents.splice(i, 1, {element: alreadyExistedComponent.element, props: newProps})
+            }
+            element.append(alreadyExistedComponent.element)
+        } else {
+            const taskInstance = TaskComponent({task, setIsDone: localState.setIsDone})
+            element.append(taskInstance.element)
+            localState.childrenComponents.push(taskInstance)
+        }
+    })
+    console.log(localState.childrenComponents)
+
 }
+
+function isSameProps(prevProps, newProps) {
+    if (!(Object.keys(prevProps).length === Object.keys(newProps).length)) {
+        return false
+    }
+    if (prevProps !== newProps) {
+        return false
+    }
+    const prevValues = Object.values(prevProps)
+    const newValues = Object.values(newProps)
+
+    for (let i = 0; i < newValues; i++) {
+        if (prevValues[i] !== newValues[i]) {
+            return false
+        }
+    }
+    return true
+}
+
