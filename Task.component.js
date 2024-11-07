@@ -2,8 +2,6 @@ export function TaskComponent(props) {
     const element = document.createElement('li')
     console.log('Task mount')
 
-    TaskComponent.render({element, props})
-
     return {
         element,
         props
