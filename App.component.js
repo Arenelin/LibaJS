@@ -17,7 +17,6 @@ export function AppComponent() {
 }
 
 AppComponent.render = ({element, localState, liba}) => {
-    element.innerHTML = ''
     localState.childrenComponents.forEach(cc => cc.cleanup?.())
     localState.childrenComponents = []
 
@@ -33,7 +32,7 @@ AppComponent.render = ({element, localState, liba}) => {
 
     pageSelector.addEventListener('change', e => {
         localState.currentPage = e.target.value
-        AppComponent.render({element, localState, liba})
+        liba.refresh()
     })
     pageSelector.value = localState.currentPage
     element.append(pageSelector)

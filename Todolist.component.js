@@ -1,6 +1,6 @@
 import {TaskComponent} from "./Task.component.js";
 
-export function TodolistComponent() {
+export function TodolistComponent(_, {liba}) {
     const element = document.createElement('ul')
     console.log('Todolist mount')
 
@@ -15,7 +15,7 @@ export function TodolistComponent() {
                 .map(t => t.id === id
                     ? {...t, isDone: newIsDoneValue}
                     : t)
-            TodolistComponent.render({element, localState})
+            liba.refresh()
         },
         childrenComponents: []
     }
@@ -27,7 +27,6 @@ export function TodolistComponent() {
 }
 
 TodolistComponent.render = ({element, localState, liba}) => {
-    element.innerHTML = ''
     localState.childrenComponents.forEach(cc => cc.cleanup?.())
 
     const header = document.createElement('h1')
@@ -36,22 +35,22 @@ TodolistComponent.render = ({element, localState, liba}) => {
 
     console.log('Todolist re-render')
     localState.tasks.forEach((task, i) => {
-        const alreadyExistedComponent = localState.childrenComponents[i]
-        if (alreadyExistedComponent) {
-            if (!isSameProps(alreadyExistedComponent.props.task, localState.tasks[i])) {
-                const newProps = {task: localState.tasks[i], setIsDone: localState.setIsDone}
-                TaskComponent.render({
-                    element: alreadyExistedComponent.element,
-                    props: newProps
-                })
-                localState.childrenComponents.splice(i, 1, {element: alreadyExistedComponent.element, props: newProps})
-            }
-            element.append(alreadyExistedComponent.element)
-        } else {
+        // const alreadyExistedComponent = localState.childrenComponents[i]
+        // if (alreadyExistedComponent) {
+        //     if (!isSameProps(alreadyExistedComponent.props.task, localState.tasks[i])) {
+        //         const newProps = {task: localState.tasks[i], setIsDone: localState.setIsDone}
+        //         TaskComponent.render({
+        //             element: alreadyExistedComponent.element,
+        //             props: newProps
+        //         })
+        //         localState.childrenComponents.splice(i, 1, {element: alreadyExistedComponent.element, props: newProps})
+        //     }
+        //     element.append(alreadyExistedComponent.element)
+        // } else {
             const taskInstance = liba.create(TaskComponent, {task, setIsDone: localState.setIsDone})
             element.append(taskInstance.element)
             localState.childrenComponents.push(taskInstance)
-        }
+        // }
     })
 }
 

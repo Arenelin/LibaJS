@@ -9,7 +9,6 @@ export function TaskComponent(props) {
 }
 
 TaskComponent.render = ({element, props}) => {
-    element.innerHTML = ''
     element.append(props.task.title)
     const checkbox = document.createElement('input')
     checkbox.type = 'checkbox'
