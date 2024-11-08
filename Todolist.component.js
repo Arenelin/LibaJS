@@ -17,7 +17,6 @@ export function TodolistComponent(_, {liba}) {
                     : t)
             liba.refresh()
         },
-        childrenComponents: []
     }
 
     return {
@@ -27,8 +26,6 @@ export function TodolistComponent(_, {liba}) {
 }
 
 TodolistComponent.render = ({element, localState, liba}) => {
-    localState.childrenComponents.forEach(cc => cc.cleanup?.())
-
     const header = document.createElement('h1')
     header.append('Todolist page')
     element.append(header)
@@ -49,26 +46,9 @@ TodolistComponent.render = ({element, localState, liba}) => {
         // } else {
             const taskInstance = liba.create(TaskComponent, {task, setIsDone: localState.setIsDone})
             element.append(taskInstance.element)
-            localState.childrenComponents.push(taskInstance)
         // }
     })
 }
 
-function isSameProps(prevProps, newProps) {
-    if (!(Object.keys(prevProps).length === Object.keys(newProps).length)) {
-        return false
-    }
-    if (prevProps !== newProps) {
-        return false
-    }
-    const prevValues = Object.values(prevProps)
-    const newValues = Object.values(newProps)
 
-    for (let i = 0; i < newValues; i++) {
-        if (prevValues[i] !== newValues[i]) {
-            return false
-        }
-    }
-    return true
-}
 

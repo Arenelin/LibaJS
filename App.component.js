@@ -5,7 +5,6 @@ export function AppComponent() {
     const element = document.createElement('div')
     const localState = {
         currentPage: 'todolist',
-        childrenComponents: []
     }
 
     console.log('App mount')
@@ -17,9 +16,6 @@ export function AppComponent() {
 }
 
 AppComponent.render = ({element, localState, liba}) => {
-    localState.childrenComponents.forEach(cc => cc.cleanup?.())
-    localState.childrenComponents = []
-
     const pageSelector = document.createElement('select')
     const counterPageOption = document.createElement('option')
     counterPageOption.value = 'counter'
@@ -42,13 +38,11 @@ AppComponent.render = ({element, localState, liba}) => {
     switch (localState.currentPage) {
         case 'counter': {
             const counterInstance = liba.create(CounterComponent)
-            localState.childrenComponents.push(counterInstance)
             element.append(counterInstance.element)
             break
         }
         case 'todolist': {
             const todolistInstance = liba.create(TodolistComponent)
-            localState.childrenComponents.push(todolistInstance)
             element.append(todolistInstance.element)
             break
         }
