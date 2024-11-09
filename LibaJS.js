@@ -1,15 +1,20 @@
-function isSameProps(prevProps, newProps) {
-    if (!(Object.keys(prevProps).length === Object.keys(newProps).length)) {
-        return false
+function propsTheSame(prevProps, newProps) {
+    if (prevProps === newProps) {
+        return true
     }
-    if (prevProps !== newProps) {
-        return false
-    }
-    const prevValues = Object.values(prevProps)
-    const newValues = Object.values(newProps)
 
-    for (let i = 0; i < newValues; i++) {
-        if (prevValues[i] !== newValues[i]) {
+    if ((prevProps == null && newProps != null) || (prevProps != null && newProps == null)) {
+        return false
+    }
+
+    const prevKeys = Object.keys(prevProps || {})
+    const newKeys = Object.keys(newProps || {})
+    if (prevKeys.length !== newKeys.length) {
+        return false
+    }
+
+    for (let key of prevKeys) {
+        if (prevProps[key] !== newProps[key]) {
             return false
         }
     }
@@ -28,6 +33,22 @@ export const Liba = {
     create(ComponentFunction, props = {}, {parent} = {parent: null}) {
         const renderLiba = {
             create(ChildrenComponentFunction, props = {}) {
+                componentInstance.childrenIndex++
+                const alreadyExistedComponentInstance = componentInstance.childrenComponents?.[componentInstance.childrenIndex]
+
+                if (alreadyExistedComponentInstance) {
+                    if (alreadyExistedComponentInstance.type === ChildrenComponentFunction) {
+                        if (propsTheSame(alreadyExistedComponentInstance.props, props)) {
+                            return alreadyExistedComponentInstance
+                        } else {
+                            alreadyExistedComponentInstance.props = props
+                            alreadyExistedComponentInstance.refresh()
+                            return alreadyExistedComponentInstance
+                        }
+                    } else {
+                        componentInstance.childrenComponents.splice(componentInstance.childrenIndex, 1)
+                    }
+                }
                 const childInstance = Liba.create(ChildrenComponentFunction, props, {parent: componentInstance})
                 return childInstance
             },
@@ -42,13 +63,17 @@ export const Liba = {
         }
 
         const componentInstance = ComponentFunction(props, {liba: componentLiba})
+        componentInstance.type = ComponentFunction
+        componentInstance.refresh = renderLiba.refresh
+
         if (parent) {
             ensureChildren(parent)
-            parent.childrenComponents.push(componentInstance)
+            parent.childrenComponents[parent.childrenIndex] = componentInstance
         }
 
-
         const renderComponent = () => {
+            componentInstance.childrenIndex = -1
+
             ComponentFunction.render({
                 element: componentInstance.element,
                 localState: componentInstance.localState,

@@ -31,22 +31,9 @@ TodolistComponent.render = ({element, localState, liba}) => {
     element.append(header)
 
     console.log('Todolist re-render')
-    localState.tasks.forEach((task, i) => {
-        // const alreadyExistedComponent = localState.childrenComponents[i]
-        // if (alreadyExistedComponent) {
-        //     if (!isSameProps(alreadyExistedComponent.props.task, localState.tasks[i])) {
-        //         const newProps = {task: localState.tasks[i], setIsDone: localState.setIsDone}
-        //         TaskComponent.render({
-        //             element: alreadyExistedComponent.element,
-        //             props: newProps
-        //         })
-        //         localState.childrenComponents.splice(i, 1, {element: alreadyExistedComponent.element, props: newProps})
-        //     }
-        //     element.append(alreadyExistedComponent.element)
-        // } else {
-            const taskInstance = liba.create(TaskComponent, {task, setIsDone: localState.setIsDone})
-            element.append(taskInstance.element)
-        // }
+    localState.tasks.forEach((task) => {
+        const taskInstance = liba.create(TaskComponent, {task, setIsDone: localState.setIsDone})
+        element.append(taskInstance.element)
     })
 }
 
