@@ -6,7 +6,8 @@
 
     // Modules options
     "module": "esnext",
-    "rootDir": "./",
+    "rootDir": "src",
+    "outDir": "dist",
     "moduleResolution": "node",
     "baseUrl": "./src",
     "resolveJsonModule": true,
@@ -41,8 +42,6 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": [
-    "./src"
-  ],
-  "exclude": ["./node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }
