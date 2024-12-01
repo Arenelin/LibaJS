@@ -1,23 +1,23 @@
-export type ComponentFunction<L extends object = {}, P extends object = {}> = {
-    ({liba}: ComponentLibaParam, props: P): ComponentInstance<L, P>
-    render: (params: RenderParams<L, P>) => void
+export type ComponentFunction<P extends object = {}, L extends object = {}> = {
+    ({liba}: ComponentLibaParam, props: P): ComponentInstance<P, L>
+    render: (params: RenderParams<P, L>) => void
 }
 
-export type ComponentInstance<L extends object = {}, P extends object = {}> = {
+export type ComponentInstance<P extends object = {}, L extends object = {}> = {
     element: HTMLElement
-    localState?: L
     props?: P
+    localState?: L
     cleanup?: () => void
-    type?: ComponentFunction<L, P>
+    type?: ComponentFunction<P, L>
     refresh?: () => void
-    childrenComponents?: ComponentInstance<L, P>[]
+    childrenComponents?: ComponentInstance<P, L>[]
     childrenIndex?: number
 }
 
-export type RenderParams<L extends object = object, PP extends object = object> = {
+export type RenderParams<P extends object = {}, L extends object = {}> = {
     element: HTMLElement
+    props: P
     localState: L
-    props: PP
     liba: RenderLiba
 }
 
@@ -30,21 +30,21 @@ export type ComponentLibaParam = {
 }
 
 export type RenderLiba = {
-    create: <L extends object = {}, P extends object = {}>(ChildrenComponentFunction: ComponentFunction<L, P>, props?: P)
-        => ComponentInstance<L, P>
+    create: <P extends object = {}, L extends object = {}>(ChildrenComponentFunction: ComponentFunction<P, L>, props?: P)
+        => ComponentInstance<P, L>
     refresh: () => void
 }
 
-export type ParentInstance<L extends object = {}, P extends object = {}> = ComponentInstance<L, P> | null
+export type ParentInstance<P extends object = {}, L extends object = {}> = ComponentInstance<P, L> | null
 
-export type CreateComponentParams<L extends object = {}, P extends object = {}> = {
-    ComponentFunction: ComponentFunction<L, P>
+export type CreateComponentParams<P extends object = {}, L extends object = {}> = {
+    ComponentFunction: ComponentFunction<P, L>
     props?: object
     parentInstance?: ParentInstance<any, any>
 }
 
-export type RenderComponentParams<L extends object = {}, P extends object = {}> = {
-    ComponentFunction: ComponentFunction<L, P>
-    componentInstance: ComponentInstance<L, P>
+export type RenderComponentParams<P extends object = {}, L extends object = {}> = {
+    ComponentFunction: ComponentFunction<P, L>
+    componentInstance: ComponentInstance<P, L>
     renderLiba: RenderLiba
 }

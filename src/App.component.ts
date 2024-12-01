@@ -1,4 +1,4 @@
-import {ComponentFunction, RenderParams} from "./types";
+import {RenderParams} from "./types";
 import {CounterComponent} from "./Counter.component";
 import {TodolistComponent} from "./Todolist.component";
 
@@ -11,10 +11,9 @@ export type AppLocalState = {
     currentPage: CurrentPage
 }
 
-
-export const AppComponent: ComponentFunction<AppLocalState> = () => {
+export const AppComponent = () => {
     const element = document.createElement('div');
-    const localState: AppLocalState = {
+    const localState = {
         currentPage: CurrentPage.Todolist,
     };
 
@@ -26,7 +25,7 @@ export const AppComponent: ComponentFunction<AppLocalState> = () => {
     };
 };
 
-AppComponent.render = ({ element, localState, liba }: RenderParams<AppLocalState>) => {
+AppComponent.render = ({element, localState, liba}: RenderParams<{}, AppLocalState>) => {
     const pageSelector = document.createElement('select');
     const counterPageOption = document.createElement('option');
     counterPageOption.value = CurrentPage.Counter;

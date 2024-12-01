@@ -10,15 +10,15 @@ import {
 
 
 export const Liba = {
-    create<L extends object, P extends object>(
+    create<P extends object, L extends object>(
         {
             ComponentFunction,
             props = {},
             parentInstance = null
-        }: CreateComponentParams<L, P>) {
+        }: CreateComponentParams<P, L>) {
 
         const renderLiba: RenderLiba = {
-            create<L extends object, P extends object>(ComponentFunction: ComponentFunction<L, P>, props = {}) {
+            create<P extends object, L extends object>(ComponentFunction: ComponentFunction<P, L>, props = {}) {
                 return createChildrenComponent({ComponentFunction, props, parentInstance: componentInstance})
             },
             refresh() {
@@ -50,12 +50,12 @@ export const Liba = {
     }
 }
 
-function createChildrenComponent<L extends object, P extends object>(
+function createChildrenComponent<P extends object, L extends object>(
     {
         ComponentFunction,
         props = {},
         parentInstance
-    }: CreateComponentParams<L, P>): ComponentInstance<L, P> {
+    }: CreateComponentParams<P, L>): ComponentInstance<P, L> {
 
     if (parentInstance) {
         if (!parentInstance.childrenIndex) {
@@ -66,7 +66,7 @@ function createChildrenComponent<L extends object, P extends object>(
 
         if (alreadyExistedComponentInstance) {
             if (alreadyExistedComponentInstance.type &&
-                (alreadyExistedComponentInstance.type as ComponentFunction<L, P>) === ComponentFunction) {
+                (alreadyExistedComponentInstance.type as ComponentFunction<P, L>) === ComponentFunction) {
                 if (alreadyExistedComponentInstance.props && propsTheSame(alreadyExistedComponentInstance.props, props)) {
                     return alreadyExistedComponentInstance
                 } else {
@@ -83,12 +83,12 @@ function createChildrenComponent<L extends object, P extends object>(
     return Liba.create({ComponentFunction, props, parentInstance})
 }
 
-function renderComponent<L extends object, P extends object>(
+function renderComponent<P extends object, L extends object>(
     {
         ComponentFunction,
         componentInstance,
         renderLiba
-    }: RenderComponentParams<L, P>) {
+    }: RenderComponentParams<P, L>) {
     componentInstance.childrenIndex = -1
 
     ComponentFunction.render({
@@ -99,7 +99,7 @@ function renderComponent<L extends object, P extends object>(
     })
 }
 
-function cleanComponent<L extends object, P extends object>(componentInstance: ComponentInstance<L, P>) {
+function cleanComponent<P extends object, L extends object>(componentInstance: ComponentInstance<P, L>) {
     componentInstance.element.innerHTML = ''
     componentInstance.childrenComponents?.forEach(cc => cc.cleanup?.())
 }
