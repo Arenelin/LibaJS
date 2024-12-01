@@ -28,9 +28,7 @@ export const Liba = {
         }
 
         const componentLiba: ComponentLiba = {
-            refresh: () => {
-                cleanComponent(componentInstance)
-            }
+            refresh: renderLiba.refresh
         }
 
         const componentInstance = ComponentFunction({liba: componentLiba}, props as P)
@@ -39,7 +37,7 @@ export const Liba = {
 
         if (parentInstance) {
             ensureChildren(parentInstance)
-            if (parentInstance.childrenComponents && parentInstance.childrenIndex) {
+            if (parentInstance.childrenComponents && parentInstance.childrenIndex !== undefined) {
                 parentInstance.childrenComponents[parentInstance.childrenIndex] = componentInstance
             }
         }
@@ -58,7 +56,7 @@ function createChildrenComponent<P extends object, L extends object>(
     }: CreateComponentParams<P, L>): ComponentInstance<P, L> {
 
     if (parentInstance) {
-        if (!parentInstance.childrenIndex) {
+        if (parentInstance.childrenIndex === undefined) {
             parentInstance.childrenIndex = -1
         }
         parentInstance.childrenIndex++
@@ -93,8 +91,8 @@ function renderComponent<P extends object, L extends object>(
 
     ComponentFunction.render({
         element: componentInstance.element,
-        localState: (componentInstance.localState) as L,
         props: (componentInstance.props) as P,
+        localState: (componentInstance.localState) as L,
         liba: renderLiba
     })
 }
