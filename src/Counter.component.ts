@@ -6,15 +6,11 @@ type CounterLocalState = {
 
 export const CounterComponent = ({liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-
-    const localState: CounterLocalState = {
-        value: 1,
-    };
+    const [localState, setLocalState] = liba.useState(0)
 
     console.log('Counter mount');
     const intervalId = setInterval(() => {
-        localState.value++;
-        liba.refresh();
+        setLocalState(localState.value + 1)
     }, 1000);
 
     return {

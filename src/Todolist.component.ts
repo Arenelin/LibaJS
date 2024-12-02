@@ -7,9 +7,12 @@ export type TaskEntity = {
     isDone: boolean;
 };
 
-type TodolistLocalState = {
-    tasks: TaskEntity[];
+type Props = {
     setIsDone: (id: number, newIsDoneValue: boolean) => void;
+}
+
+type TodolistLocalState = {
+    value: TaskEntity[];
 };
 
 export type TaskProps = {
@@ -20,39 +23,42 @@ export type TaskProps = {
 
 export const TodolistComponent = ({liba}: ComponentLibaParam) => {
     const element = document.createElement('ul');
+    const [localState, setLocalState] = liba.useState([
+        {id: 1, title: 'JavaScript', isDone: true},
+        {id: 2, title: 'React', isDone: true},
+        {id: 3, title: 'C++', isDone: false},
+    ])
+
     console.log('Todolist mount');
 
-    const localState = {
-        tasks: [
-            {id: 1, title: 'JavaScript', isDone: true},
-            {id: 2, title: 'React', isDone: true},
-            {id: 3, title: 'C++', isDone: false},
-        ],
-        setIsDone: (id: number, newIsDoneValue: boolean) => {
-            localState.tasks = localState.tasks.map(t =>
-                t.id === id
-                    ? {...t, isDone: newIsDoneValue}
-                    : t
-            );
-            liba.refresh();
-        },
-    };
+    const setIsDone = (id: number, newIsDoneValue: boolean) => {
+        setLocalState(localState.value.map((t: any) =>
+            t.id === id
+                ? {...t, isDone: newIsDoneValue}
+                : t
+        ))
+    }
+
+    const renderProps = {
+        setIsDone
+    }
 
     return {
         element,
         localState,
+        props: renderProps
     };
 };
 
-TodolistComponent.render = ({element, localState, liba}: RenderParams<{}, TodolistLocalState>) => {
+TodolistComponent.render = ({element, localState, liba, props}: RenderParams<Props, TodolistLocalState>) => {
     const header = document.createElement('h1');
     header.append('Todolist page');
     element.append(header);
 
     console.log('Todolist re-render');
 
-    localState.tasks.forEach((task) => {
-        const taskInstance = liba.create(TaskComponent, {task, setIsDone: localState.setIsDone});
+    localState.value.forEach((task) => {
+        const taskInstance = liba.create(TaskComponent, {task, setIsDone: props.setIsDone});
         element.append(taskInstance.element);
     });
 };

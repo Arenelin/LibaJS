@@ -3,6 +3,7 @@ import {
     ComponentInstance,
     ComponentLiba,
     CreateComponentParams,
+    LocalState,
     ParentInstance,
     RenderComponentParams,
     RenderLiba
@@ -28,8 +29,31 @@ export const Liba = {
         }
 
         const componentLiba: ComponentLiba = {
-            refresh: renderLiba.refresh
-        }
+            refresh: renderLiba.refresh,
+            useState(initialState) {
+                const localState: LocalState<typeof initialState> = {
+                    value: initialState
+                }
+
+                if (typeof initialState === 'function') {
+                    localState.value = initialState();
+                } else {
+                    localState.value = initialState;
+                }
+                return [localState, (newState: any) => {
+                    if (typeof newState === 'function') {
+                        localState.value = newState(localState.value);
+                    } else {
+                        localState.value = newState;
+                    }
+                    componentLiba.refresh();
+                }];
+            }
+        };
+        // 1. Принимает initial state. Может принять в качестве него функцию => нужно вызвать
+        // 2. Возвращает кортеж из актуального стейта + функции-сеттера
+        // 3. Если в функцию сеттер передается функция, то в качестве аргуметов она получает предыдущее значение стейта.
+        // 4. Вызывается liba.refresh(), если стейт изменился (shallow equal)
 
         const componentInstance = ComponentFunction({liba: componentLiba}, props as P)
         componentInstance.type = ComponentFunction

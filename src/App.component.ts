@@ -1,4 +1,4 @@
-import {RenderParams} from "./types";
+import {ComponentLibaParam, RenderParams} from "./types";
 import {CounterComponent} from "./Counter.component";
 import {TodolistComponent} from "./Todolist.component";
 
@@ -8,24 +8,30 @@ enum CurrentPage {
 }
 
 export type AppLocalState = {
-    currentPage: CurrentPage
+    value: CurrentPage
 }
 
-export const AppComponent = () => {
+type Props = {
+    setLocalState: (newState: any) => void
+}
+
+export const AppComponent = ({liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    const localState = {
-        currentPage: CurrentPage.Todolist,
-    };
+    const [localState, setLocalState] = liba.useState(CurrentPage.Todolist)
 
     console.log('App mount');
+    const renderProps = {
+        setLocalState
+    }
 
     return {
         element,
         localState,
+        props: renderProps
     };
 };
 
-AppComponent.render = ({element, localState, liba}: RenderParams<{}, AppLocalState>) => {
+AppComponent.render = ({element, localState, liba, props}: RenderParams<Props, AppLocalState>) => {
     const pageSelector = document.createElement('select');
     const counterPageOption = document.createElement('option');
     counterPageOption.value = CurrentPage.Counter;
@@ -38,17 +44,16 @@ AppComponent.render = ({element, localState, liba}: RenderParams<{}, AppLocalSta
 
     const onChangeCurrentPage = (e: Event) => {
         const selectHTMLElement = e.currentTarget as HTMLSelectElement;
-        localState.currentPage = selectHTMLElement.value as CurrentPage;
-        liba.refresh();
+        props.setLocalState(selectHTMLElement.value)
     };
 
     pageSelector.addEventListener('change', onChangeCurrentPage);
-    pageSelector.value = localState.currentPage;
+    pageSelector.value = localState.value;
     element.append(pageSelector);
 
     console.log('App re-render');
 
-    switch (localState.currentPage) {
+    switch (localState.value) {
         case CurrentPage.Counter: {
             const counterInstance = liba.create(CounterComponent);
             element.append(counterInstance.element);
