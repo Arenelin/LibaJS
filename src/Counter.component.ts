@@ -1,8 +1,4 @@
-import {ComponentLibaParam, RenderParams} from "./types";
-
-type CounterLocalState = {
-    value: number
-}
+import {ComponentLibaParam, LocalState, RenderParams} from "./types";
 
 export const CounterComponent = ({liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
@@ -22,7 +18,7 @@ export const CounterComponent = ({liba}: ComponentLibaParam) => {
     };
 }
 
-CounterComponent.render = ({element, localState}: RenderParams<{}, CounterLocalState>) => {
+CounterComponent.render = ({element, localState}: RenderParams<{}, LocalState<number>>) => {
     element.append(localState.value.toString());
     console.log('Counter re-render');
 };

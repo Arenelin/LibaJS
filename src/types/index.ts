@@ -21,15 +21,17 @@ export type RenderParams<P extends object = {}, L extends object = {}> = {
     liba: RenderLiba
 }
 
-export type LocalState<T> = {
-    value: T
+export type LocalState<S> = {
+    value: S
 }
 
-export type FunctionSetter<T> = (newState: T) => void
+export type SetStateAction<S> = S | ((prevState: S) => S);
+
+export type Dispatch<A> = (value: A) => void;
 
 export type ComponentLiba = {
     refresh: () => void
-    useState: <T>(initialState: T) => [LocalState<T>, FunctionSetter<T>]
+    useState: <S>(initialState: S | (() => S)) => [LocalState<S>, Dispatch<SetStateAction<S>>]
 }
 
 export type ComponentLibaParam = {

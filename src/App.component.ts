@@ -1,4 +1,4 @@
-import {ComponentLibaParam, RenderParams} from "./types";
+import {ComponentLibaParam, Dispatch, LocalState, RenderParams, SetStateAction} from "./types";
 import {CounterComponent} from "./Counter.component";
 import {TodolistComponent} from "./Todolist.component";
 
@@ -7,12 +7,8 @@ enum CurrentPage {
     Counter = 'counter'
 }
 
-export type AppLocalState = {
-    value: CurrentPage
-}
-
 type Props = {
-    setLocalState: (newState: any) => void
+    setLocalState: Dispatch<SetStateAction<CurrentPage>>
 }
 
 export const AppComponent = ({liba}: ComponentLibaParam) => {
@@ -31,7 +27,7 @@ export const AppComponent = ({liba}: ComponentLibaParam) => {
     };
 };
 
-AppComponent.render = ({element, localState, liba, props}: RenderParams<Props, AppLocalState>) => {
+AppComponent.render = ({element, localState, liba, props}: RenderParams<Props, LocalState<CurrentPage>>) => {
     const pageSelector = document.createElement('select');
     const counterPageOption = document.createElement('option');
     counterPageOption.value = CurrentPage.Counter;
@@ -44,7 +40,7 @@ AppComponent.render = ({element, localState, liba, props}: RenderParams<Props, A
 
     const onChangeCurrentPage = (e: Event) => {
         const selectHTMLElement = e.currentTarget as HTMLSelectElement;
-        props.setLocalState(selectHTMLElement.value)
+        props.setLocalState(selectHTMLElement.value as CurrentPage)
     };
 
     pageSelector.addEventListener('change', onChangeCurrentPage);

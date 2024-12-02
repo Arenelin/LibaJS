@@ -2,11 +2,11 @@ import {
     ComponentFunction,
     ComponentInstance,
     ComponentLiba,
-    CreateComponentParams,
+    CreateComponentParams, Dispatch,
     LocalState,
     ParentInstance,
     RenderComponentParams,
-    RenderLiba
+    RenderLiba, SetStateAction
 } from "./types";
 
 
@@ -30,30 +30,23 @@ export const Liba = {
 
         const componentLiba: ComponentLiba = {
             refresh: renderLiba.refresh,
-            useState(initialState) {
-                const localState: LocalState<typeof initialState> = {
-                    value: initialState
-                }
+            useState<S>(initialState: S | (() => S)): [LocalState<S>, Dispatch<SetStateAction<S>>] {
+                const localState: LocalState<S> = {
+                    value: typeof initialState === 'function'
+                        ? (initialState as () => S)()
+                        : initialState
+                };
 
-                if (typeof initialState === 'function') {
-                    localState.value = initialState();
-                } else {
-                    localState.value = initialState;
-                }
-                return [localState, (newState: any) => {
-                    if (typeof newState === 'function') {
-                        localState.value = newState(localState.value);
-                    } else {
-                        localState.value = newState;
-                    }
+                const setState: Dispatch<SetStateAction<S>> = (newState) => {
+                    localState.value = typeof newState === 'function'
+                        ? (newState as (prevState: S) => S)(localState.value)
+                        : newState;
                     componentLiba.refresh();
-                }];
+                };
+
+                return [localState, setState];
             }
         };
-        // 1. Принимает initial state. Может принять в качестве него функцию => нужно вызвать
-        // 2. Возвращает кортеж из актуального стейта + функции-сеттера
-        // 3. Если в функцию сеттер передается функция, то в качестве аргуметов она получает предыдущее значение стейта.
-        // 4. Вызывается liba.refresh(), если стейт изменился (shallow equal)
 
         const componentInstance = ComponentFunction({liba: componentLiba}, props as P)
         componentInstance.type = ComponentFunction

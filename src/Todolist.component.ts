@@ -1,4 +1,4 @@
-import {ComponentLibaParam, RenderParams} from "./types";
+import {ComponentLibaParam, LocalState, RenderParams} from "./types";
 import {TaskComponent} from "./Task.component";
 
 export type TaskEntity = {
@@ -11,19 +11,9 @@ type Props = {
     setIsDone: (id: number, newIsDoneValue: boolean) => void;
 }
 
-type TodolistLocalState = {
-    value: TaskEntity[];
-};
-
-export type TaskProps = {
-    task: TaskEntity;
-    setIsDone: (id: number, newIsDoneValue: boolean) => void;
-};
-
-
 export const TodolistComponent = ({liba}: ComponentLibaParam) => {
     const element = document.createElement('ul');
-    const [localState, setLocalState] = liba.useState([
+    const [localState, setLocalState] = liba.useState<TaskEntity[]>([
         {id: 1, title: 'JavaScript', isDone: true},
         {id: 2, title: 'React', isDone: true},
         {id: 3, title: 'C++', isDone: false},
@@ -32,7 +22,7 @@ export const TodolistComponent = ({liba}: ComponentLibaParam) => {
     console.log('Todolist mount');
 
     const setIsDone = (id: number, newIsDoneValue: boolean) => {
-        setLocalState(localState.value.map((t: any) =>
+        setLocalState(localState.value.map(t =>
             t.id === id
                 ? {...t, isDone: newIsDoneValue}
                 : t
@@ -50,7 +40,7 @@ export const TodolistComponent = ({liba}: ComponentLibaParam) => {
     };
 };
 
-TodolistComponent.render = ({element, localState, liba, props}: RenderParams<Props, TodolistLocalState>) => {
+TodolistComponent.render = ({element, localState, liba, props}: RenderParams<Props, LocalState<TaskEntity[]>>) => {
     const header = document.createElement('h1');
     header.append('Todolist page');
     element.append(header);

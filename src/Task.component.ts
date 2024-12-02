@@ -1,7 +1,12 @@
 import {ComponentLibaParam, RenderParams} from "types";
-import {TaskProps} from "./Todolist.component";
+import {TaskEntity} from "./Todolist.component";
 
-export const TaskComponent = ({liba}: ComponentLibaParam, props: TaskProps) => {
+type Props = {
+    task: TaskEntity;
+    setIsDone: (id: number, newIsDoneValue: boolean) => void;
+};
+
+export const TaskComponent = ({liba}: ComponentLibaParam, props: Props) => {
     const element = document.createElement('li')
     console.log('Task mount')
     console.log(liba)
@@ -12,7 +17,7 @@ export const TaskComponent = ({liba}: ComponentLibaParam, props: TaskProps) => {
     }
 }
 
-TaskComponent.render = ({element, props}: RenderParams<TaskProps>) => {
+TaskComponent.render = ({element, props}: RenderParams<Props>) => {
     element.append(props.task.title)
     const checkbox = document.createElement('input')
     checkbox.type = 'checkbox'
