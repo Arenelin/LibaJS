@@ -1,4 +1,4 @@
-import {ComponentLibaParam, LocalState, RenderParams} from "./types";
+import {ComponentLibaParam, LocalState, RenderParams} from "types";
 
 export const CounterComponent = ({liba}: ComponentLibaParam) => {
     const element = document.createElement('div');

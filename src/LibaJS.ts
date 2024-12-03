@@ -1,13 +1,14 @@
 import {
-    ComponentFunction,
+    ComponentFn,
     ComponentInstance,
     ComponentLiba,
-    CreateComponentParams, Dispatch,
-    LocalState,
-    ParentInstance,
+    CreateComponentParams,
+    Dispatch,
+    LocalState, ParentInstance,
     RenderComponentParams,
-    RenderLiba, SetStateAction
-} from "./types";
+    RenderLiba,
+    SetStateAction
+} from "types";
 
 
 export const Liba = {
@@ -19,7 +20,7 @@ export const Liba = {
         }: CreateComponentParams<P, L>) {
 
         const renderLiba: RenderLiba = {
-            create<P extends object, L extends object>(ComponentFunction: ComponentFunction<P, L>, props = {}) {
+            create<P extends object, L extends object>(ComponentFunction: ComponentFn<P, L>, props = {}) {
                 return createChildrenComponent({ComponentFunction, props, parentInstance: componentInstance})
             },
             refresh() {
@@ -31,20 +32,20 @@ export const Liba = {
         const componentLiba: ComponentLiba = {
             refresh: renderLiba.refresh,
             useState<S>(initialState: S | (() => S)): [LocalState<S>, Dispatch<SetStateAction<S>>] {
-                const localState: LocalState<S> = {
+                const state: LocalState<S> = {
                     value: typeof initialState === 'function'
                         ? (initialState as () => S)()
                         : initialState
                 };
 
                 const setState: Dispatch<SetStateAction<S>> = (newState) => {
-                    localState.value = typeof newState === 'function'
-                        ? (newState as (prevState: S) => S)(localState.value)
+                    state.value = typeof newState === 'function'
+                        ? (newState as (prevState: S) => S)(state.value)
                         : newState;
                     componentLiba.refresh();
                 };
 
-                return [localState, setState];
+                return [state, setState];
             }
         };
 
@@ -81,7 +82,7 @@ function createChildrenComponent<P extends object, L extends object>(
 
         if (alreadyExistedComponentInstance) {
             if (alreadyExistedComponentInstance.type &&
-                (alreadyExistedComponentInstance.type as ComponentFunction<P, L>) === ComponentFunction) {
+                (alreadyExistedComponentInstance.type as ComponentFn<P, L>) === ComponentFunction) {
                 if (alreadyExistedComponentInstance.props && propsTheSame(alreadyExistedComponentInstance.props, props)) {
                     return alreadyExistedComponentInstance
                 } else {

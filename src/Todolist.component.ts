@@ -1,4 +1,4 @@
-import {ComponentLibaParam, LocalState, RenderParams} from "./types";
+import {ComponentLibaParam, LocalState, RenderParams} from "types";
 import {TaskComponent} from "./Task.component";
 
 export type TaskEntity = {

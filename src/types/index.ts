@@ -1,4 +1,4 @@
-export type ComponentFunction<P extends object = {}, L extends object = {}> = {
+export type ComponentFn<P extends object = {}, L extends object = {}> = {
     ({liba}: ComponentLibaParam, props: P): ComponentInstance<P, L>
     render: (params: RenderParams<P, L>) => void
 }
@@ -8,7 +8,7 @@ export type ComponentInstance<P extends object = {}, L extends object = {}> = {
     props?: P
     localState?: L
     cleanup?: () => void
-    type?: ComponentFunction<P, L>
+    type?: ComponentFn<P, L>
     refresh?: () => void
     childrenComponents?: ComponentInstance<P, L>[]
     childrenIndex?: number
@@ -39,7 +39,7 @@ export type ComponentLibaParam = {
 }
 
 export type RenderLiba = {
-    create: <P extends object = {}, L extends object = {}>(ChildrenComponentFunction: ComponentFunction<P, L>, props?: P)
+    create: <P extends object = {}, L extends object = {}>(ChildrenComponentFunction: ComponentFn<P, L>, props?: P)
         => ComponentInstance<P, L>
     refresh: () => void
 }
@@ -47,13 +47,13 @@ export type RenderLiba = {
 export type ParentInstance<P extends object = {}, L extends object = {}> = ComponentInstance<P, L> | null
 
 export type CreateComponentParams<P extends object = {}, L extends object = {}> = {
-    ComponentFunction: ComponentFunction<P, L>
+    ComponentFunction: ComponentFn<P, L>
     props?: object
     parentInstance?: ParentInstance<any, any>
 }
 
 export type RenderComponentParams<P extends object = {}, L extends object = {}> = {
-    ComponentFunction: ComponentFunction<P, L>
+    ComponentFunction: ComponentFn<P, L>
     componentInstance: ComponentInstance<P, L>
     renderLiba: RenderLiba
 }

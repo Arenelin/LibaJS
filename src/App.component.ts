@@ -1,4 +1,4 @@
-import {ComponentLibaParam, Dispatch, LocalState, RenderParams, SetStateAction} from "./types";
+import {ComponentLibaParam, Dispatch, LocalState, RenderParams, SetStateAction} from "types";
 import {CounterComponent} from "./Counter.component";
 import {TodolistComponent} from "./Todolist.component";
 
