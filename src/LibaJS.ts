@@ -49,7 +49,7 @@ export const Liba = {
             }
         };
 
-        const componentInstance = ComponentFunction({liba: componentLiba}, props as P)
+        const componentInstance = ComponentFunction(props as P, {liba: componentLiba})
         componentInstance.type = ComponentFunction
         componentInstance.refresh = componentLiba.refresh
 

@@ -1,6 +1,6 @@
 import {ComponentLibaParam, LocalState, RenderParams} from "types";
 
-export const CounterComponent = ({liba}: ComponentLibaParam) => {
+export const CounterComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
     const [localState, setLocalState] = liba.useState(0)
 

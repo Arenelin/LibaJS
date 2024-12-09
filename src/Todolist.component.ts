@@ -11,7 +11,7 @@ type Props = {
     setIsDone: (id: number, newIsDoneValue: boolean) => void;
 }
 
-export const TodolistComponent = ({liba}: ComponentLibaParam) => {
+export const TodolistComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('ul');
     const [localState, setLocalState] = liba.useState<TaskEntity[]>([
         {id: 1, title: 'JavaScript', isDone: true},

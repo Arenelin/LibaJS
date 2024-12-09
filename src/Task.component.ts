@@ -6,7 +6,7 @@ type Props = {
     setIsDone: (id: number, newIsDoneValue: boolean) => void;
 };
 
-export const TaskComponent = ({liba}: ComponentLibaParam, props: Props) => {
+export const TaskComponent = (props: Props, {liba}: ComponentLibaParam, ) => {
     const element = document.createElement('li')
     console.log('Task mount')
     console.log(liba)

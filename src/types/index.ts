@@ -1,5 +1,5 @@
 export type ComponentFn<P extends object = {}, L extends object = {}> = {
-    ({liba}: ComponentLibaParam, props: P): ComponentInstance<P, L>
+    (props: P, {liba}: ComponentLibaParam): ComponentInstance<P, L>
     render: (params: RenderParams<P, L>) => void
 }
 

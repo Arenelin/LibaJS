@@ -11,7 +11,7 @@ type Props = {
     setLocalState: Dispatch<SetStateAction<CurrentPage>>
 }
 
-export const AppComponent = ({liba}: ComponentLibaParam) => {
+export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
     const [localState, setLocalState] = liba.useState(CurrentPage.Todolist)
 
