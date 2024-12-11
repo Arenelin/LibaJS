@@ -1,9 +1,9 @@
 import {ComponentLibaParam, Dispatch, LocalState, RenderParams, SetStateAction} from "types";
 import {CounterComponent} from "./Counter.component";
-import {TodolistComponent} from "./Todolist.component";
+import {TodolistsComponent} from "./Todolists.component";
 
 enum CurrentPage {
-    Todolist = 'todolist',
+    Todolists = 'todolists',
     Counter = 'counter'
 }
 
@@ -13,7 +13,7 @@ type Props = {
 
 export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    const [localState, setLocalState] = liba.useState(CurrentPage.Todolist)
+    const [localState, setLocalState] = liba.useState(CurrentPage.Todolists)
 
     console.log('App mount');
     const renderProps = {
@@ -34,7 +34,7 @@ AppComponent.render = ({element, localState, liba, props}: RenderParams<Props, L
     counterPageOption.append('Counter page');
 
     const todolistPageOption = document.createElement('option');
-    todolistPageOption.value = CurrentPage.Todolist;
+    todolistPageOption.value = CurrentPage.Todolists;
     todolistPageOption.append('Todolist page');
     pageSelector.append(counterPageOption, todolistPageOption);
 
@@ -55,9 +55,9 @@ AppComponent.render = ({element, localState, liba, props}: RenderParams<Props, L
             element.append(counterInstance.element);
             break;
         }
-        case CurrentPage.Todolist: {
-            const todolistInstance = liba.create(TodolistComponent);
-            element.append(todolistInstance.element);
+        case CurrentPage.Todolists: {
+            const todolistsInstance = liba.create(TodolistsComponent);
+            element.append(todolistsInstance.element);
             break;
         }
     }
