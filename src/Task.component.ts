@@ -3,7 +3,7 @@ import {TaskEntity} from "./Todolist.component";
 
 type Props = {
     task: TaskEntity;
-    setIsDone: (id: number, newIsDoneValue: boolean) => void;
+    setIsDone: (id: string, newIsDoneValue: boolean) => void;
 };
 
 export const TaskComponent = (props: Props, {liba}: ComponentLibaParam, ) => {
@@ -21,7 +21,7 @@ TaskComponent.render = ({element, props}: RenderParams<Props>) => {
     element.append(props.task.title)
     const checkbox = document.createElement('input')
     checkbox.type = 'checkbox'
-    checkbox.checked = props.task.isDone
+    checkbox.checked = props.task.completed
     element.append(checkbox)
 
     const onChangeIsDoneValue = (e: Event) => {
