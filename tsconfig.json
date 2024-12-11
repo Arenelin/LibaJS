@@ -17,6 +17,7 @@
     "checkJs": false,
 
     // Emit options
+    "declaration": true,
     "removeComments": true,
     "importHelpers": true,
     "downlevelIteration": true,
