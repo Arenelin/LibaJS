@@ -3,11 +3,10 @@ import {TaskEntity} from "./Todolist.component";
 
 type Props = {
     task: TaskEntity;
-    setIsDone: (id: string, newIsDoneValue: boolean) => void;
 };
 
 export const TaskComponent = (props: Props, {liba}: ComponentLibaParam, ) => {
-    const element = document.createElement('li')
+    const element = document.createElement('div')
     console.log('Task mount')
     console.log(liba)
 
@@ -24,12 +23,12 @@ TaskComponent.render = ({element, props}: RenderParams<Props>) => {
     checkbox.checked = props.task.completed
     element.append(checkbox)
 
-    const onChangeIsDoneValue = (e: Event) => {
-        const checkboxHTMLElement = e.currentTarget as HTMLInputElement
-        const newIsDoneValue = checkboxHTMLElement.checked
-        props.setIsDone(props.task.id, newIsDoneValue)
-    }
-
-    checkbox.addEventListener('change', onChangeIsDoneValue)
+    // const onChangeIsDoneValue = (e: Event) => {
+        // const checkboxHTMLElement = e.currentTarget as HTMLInputElement
+        // const newIsDoneValue = checkboxHTMLElement.checked
+        // props.setIsDone(props.task.id, newIsDoneValue)
+    // }
+    //
+    // checkbox.addEventListener('change', onChangeIsDoneValue)
     console.log('Task re-render')
 }

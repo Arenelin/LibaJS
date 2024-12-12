@@ -20,40 +20,37 @@ type Props = {
     todolist: TodolistEntity
 }
 
-export const TodolistComponent = ({todolist}: Props, {liba}: ComponentLibaParam) => {
-    const element = document.createElement('ul');
+export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
+    const element = document.createElement('div');
     const [localState, setLocalState] = liba.useState<TaskEntity[]>([])
 
     console.log('Todolist mount');
 
 
-    console.log('TODO!', todolist);
+    console.log('TODO!', props.todolist);
     console.log('TASKS!', localState);
 
     (function () {
-        getTasks(todolist.id).then(r => setLocalState(r))
+        getTasks(props.todolist.id).then(r => setLocalState(r))
     })()
 
-    const renderProps = {
-        todolist
-    }
 
     return {
         element,
         localState,
-        props: renderProps
+        props
     };
 };
 
-TodolistComponent.render = ({element}: RenderParams<Props, LocalState<TaskEntity[]>>) => {
-    const header = document.createElement('h1');
-    header.append('Todolist page');
-    element.append(header);
+TodolistComponent.render = ({element, props}: RenderParams<Props, LocalState<TaskEntity[]>>) => {
+    const title = document.createElement('h2');
+    title.append(props.todolist.title);
+    element.append(title);
 
     console.log('Todolist re-render');
 
     // localState.value.forEach((task) => {
-    //     const taskInstance = liba.create(TaskComponent, {task, setIsDone: props.setIsDone});
+    //     const taskInstance = liba.create(TaskComponent, {task});
     //     element.append(taskInstance.element);
     // });
 };
