@@ -29,7 +29,11 @@ export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
 
     const createNewTodolist = () => {
         if (todolistTitle.value.length > 0 && todolistTitle.value.trim()) {
-            createTodolist(todolistTitle.value).then(r => console.log(r))
+            createTodolist(todolistTitle.value)
+                .then(newTodo => {
+                    setTodolistTitle('')
+                    setTodolists([newTodo, ...todolists.value])
+                })
         }
     }
 
@@ -50,12 +54,17 @@ TodolistsComponent.render = ({element, liba, localState}: RenderParams<{}, Todol
         localState.setTodolistTitle(newTitleValue)
     }
 
+    const addNewTodolist = () => {
+        input.value = ''
+        localState.createNewTodolist()
+    }
+
     input.addEventListener('change', onChangeHandler)
     element.append(input)
 
     const button = document.createElement('button')
     button.append('Create new todolist')
-    button.addEventListener('click', localState.createNewTodolist)
+    button.addEventListener('click', addNewTodolist)
     element.append(button)
 
     localState.todolists.value.forEach((todolist) => {

@@ -57,3 +57,10 @@ export type RenderComponentParams<P extends object = {}, L extends object = {}> 
     componentInstance: ComponentInstance<P, L>
     renderLiba: RenderLiba
 }
+
+export type ServerResponse<T> = {
+    data: T
+    fieldsErrors: string[]
+    messages: string[]
+    resultCode: number
+}
