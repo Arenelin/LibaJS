@@ -19,6 +19,7 @@ export type TaskEntity = {
 
 type Props = {
     todolist: TodolistEntity
+    removeTodolist: (id: string) => void
 }
 
 type TodolistComponentLocalState = {
@@ -32,7 +33,6 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
     const [tasks, setTasks] = liba.useState<TaskEntity[]>([])
     const [taskTitle, setTaskTitle] = liba.useState('')
-
 
     console.log('Todolist mount');
 
@@ -61,6 +61,11 @@ TodolistComponent.render = ({element, props, localState, liba}: RenderParams<Pro
     const title = document.createElement('h2');
     title.append(props.todolist.title);
     element.append(title);
+
+    const removeButton = document.createElement('button')
+    removeButton.append('Remove todolist')
+    removeButton.addEventListener('click', () => props.removeTodolist(props.todolist.id))
+    element.append(removeButton)
 
     const input = document.createElement('input')
     input.value = localState.taskTitle.value

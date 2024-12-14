@@ -8,12 +8,14 @@ export const getTodolists = async (): Promise<TodolistEntity[]> => {
 }
 
 export const createTodolist = async (title: string): Promise<TodolistEntity> => {
-    console.log('Sending payload:', JSON.stringify({title}));
     const response: Promise<ServerResponse<CreateTodolistResponse>> =
         fetchInstance(ApiEndpoint.CreateTodolist, {method: 'POST', body: JSON.stringify({title})})
     return response.then(r => r.data.item)
 }
 
+export const deleteTodolist = async (id: string) => {
+   return await fetchInstance(`${ApiEndpoint.DeleteTodolist}/${id}`, {method: 'DELETE'})
+}
 
 type CreateTodolistResponse = {
     item: TodolistEntity
