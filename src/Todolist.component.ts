@@ -5,7 +5,7 @@ import {
     deleteTask,
     EnumTaskPriorities,
     EnumTaskStatuses,
-    getTasks,
+    getTasks, TaskStatuses,
     updateTask,
     UpdateTaskModel
 } from "./api/tasks";
@@ -25,6 +25,8 @@ export type TaskEntity = {
     addedDate: string
 };
 
+type Filter = 'all' | 'active' | 'completed'
+
 type Props = {
     todolist: TodolistEntity
     removeTodolist: (id: string) => void
@@ -32,17 +34,20 @@ type Props = {
 
 type TodolistComponentLocalState = {
     tasks: LocalState<TaskEntity[]>
+    currentFilter: LocalState<Filter>
     taskTitle: LocalState<string>
     setTaskTitle: Dispatch<SetStateAction<string>>
     createNewTask: () => void
     updateTaskHandler: (taskId: string, model: UpdateTaskModel) => void
     removeTask: (taskId: string) => void
+    filterTasks: (filterValue: Filter) => void
 }
 
 export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
     const [tasks, setTasks] = liba.useState<TaskEntity[]>([])
     const [taskTitle, setTaskTitle] = liba.useState('')
+    const [currentFilter, setCurrentFilter] = liba.useState<Filter>('all')
 
     console.log('Todolist mount');
 
@@ -73,9 +78,22 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
             .then(() => setTasks(tasks.value.filter(t => t.id !== taskId)))
     }
 
+    const filterTasks = (filterValue: Filter) => {
+        setCurrentFilter(filterValue)
+    }
+
     return {
         element,
-        localState: {tasks, createNewTask, removeTask, setTaskTitle, taskTitle, updateTaskHandler},
+        localState: {
+            tasks,
+            createNewTask,
+            removeTask,
+            setTaskTitle,
+            taskTitle,
+            updateTaskHandler,
+            filterTasks,
+            currentFilter
+        },
         props
     };
 };
@@ -84,6 +102,21 @@ TodolistComponent.render = ({element, props, localState, liba}: RenderParams<Pro
     const title = document.createElement('h2');
     title.append(props.todolist.title);
     element.append(title);
+
+    const allButton = document.createElement('button')
+    allButton.append('Show all tasks')
+    allButton.addEventListener('click', () => localState.filterTasks('all'))
+    element.append(allButton)
+
+    const activeButton = document.createElement('button')
+    activeButton.append('Show only active tasks')
+    activeButton.addEventListener('click', () => localState.filterTasks('active'))
+    element.append(activeButton)
+
+    const completedButton = document.createElement('button')
+    completedButton.append('Show only completed tasks')
+    completedButton.addEventListener('click', () => localState.filterTasks('completed'))
+    element.append(completedButton)
 
     const removeButton = document.createElement('button')
     removeButton.append('Remove todolist')
@@ -114,7 +147,13 @@ TodolistComponent.render = ({element, props, localState, liba}: RenderParams<Pro
 
     console.log('Todolist re-render');
 
-    localState.tasks.value.forEach((task) => {
+    const filteredTasks = localState.currentFilter.value !== 'all'
+        ? localState.tasks.value.filter(t => localState.currentFilter.value === 'active'
+            ? t.status === TaskStatuses.New
+            : t.status === TaskStatuses.Completed)
+        : localState.tasks.value
+
+    filteredTasks.forEach((task) => {
         const taskInstance = liba.create(TaskComponent, {
             task,
             updateTask: localState.updateTaskHandler,
