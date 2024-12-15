@@ -1,14 +1,22 @@
 import {ComponentLibaParam, Dispatch, LocalState, RenderParams, SetStateAction} from "types";
 import {TodolistEntity} from "./Todolists.component";
-import {createTask, getTasks} from "./api/tasks";
+import {
+    createTask,
+    deleteTask,
+    EnumTaskPriorities,
+    EnumTaskStatuses,
+    getTasks,
+    updateTask,
+    UpdateTaskModel
+} from "./api/tasks";
 import {TaskComponent} from "./Task.component";
 
 export type TaskEntity = {
     description: string
     title: string
     completed: boolean
-    status: number
-    priority: number
+    status: EnumTaskStatuses
+    priority: EnumTaskPriorities
     startDate: string
     deadline: string
     id: string
@@ -27,6 +35,8 @@ type TodolistComponentLocalState = {
     taskTitle: LocalState<string>
     setTaskTitle: Dispatch<SetStateAction<string>>
     createNewTask: () => void
+    updateTaskHandler: (taskId: string, model: UpdateTaskModel) => void
+    removeTask: (taskId: string) => void
 }
 
 export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
@@ -50,9 +60,22 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
         }
     }
 
+    const updateTaskHandler = async (taskId: string, model: UpdateTaskModel) => {
+        updateTask({
+            todolistId: props.todolist.id,
+            taskId,
+            model,
+        }).then(() => setTasks(tasks.value.map(t => t.id === taskId ? {...t, ...model} : t)))
+    }
+
+    const removeTask = (taskId: string) => {
+        deleteTask({todolistId: props.todolist.id, taskId})
+            .then(() => setTasks(tasks.value.filter(t => t.id !== taskId)))
+    }
+
     return {
         element,
-        localState: {tasks, createNewTask, setTaskTitle, taskTitle},
+        localState: {tasks, createNewTask, removeTask, setTaskTitle, taskTitle, updateTaskHandler},
         props
     };
 };
@@ -92,7 +115,11 @@ TodolistComponent.render = ({element, props, localState, liba}: RenderParams<Pro
     console.log('Todolist re-render');
 
     localState.tasks.value.forEach((task) => {
-        const taskInstance = liba.create(TaskComponent, {task});
+        const taskInstance = liba.create(TaskComponent, {
+            task,
+            updateTask: localState.updateTaskHandler,
+            removeTask: localState.removeTask
+        });
         element.append(taskInstance.element);
     });
     console.log(localState.tasks.value)
