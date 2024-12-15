@@ -1,22 +1,28 @@
-import {fetchInstance} from "./interceptor";
-import {TodolistEntity} from "../Todolists.component";
+import {fetchInstance, ServerResponse} from "./interceptor";
 import {ApiEndpoint} from "../constants";
-import {ServerResponse} from "../types";
 
-export const getTodolists = async (): Promise<TodolistEntity[]> => {
-    return fetchInstance(ApiEndpoint.GetTodolists)
+export const getTodolists = async () => {
+    const response: TodolistEntity[] = await fetchInstance(ApiEndpoint.GetTodolists)
+    return response
 }
 
 export const createTodolist = async (title: string): Promise<TodolistEntity> => {
-    const response: Promise<ServerResponse<CreateTodolistResponse>> =
+    const response: ServerResponse<CreateTodolistResponse> = await
         fetchInstance(ApiEndpoint.CreateTodolist, {method: 'POST', body: JSON.stringify({title})})
-    return response.then(r => r.data.item)
+    return response.data.item
 }
 
 export const deleteTodolist = async (id: string) => {
-   return await fetchInstance(`${ApiEndpoint.DeleteTodolist}/${id}`, {method: 'DELETE'})
+    return fetchInstance(`${ApiEndpoint.DeleteTodolist}/${id}`, {method: 'DELETE'})
 }
 
 type CreateTodolistResponse = {
     item: TodolistEntity
+}
+
+export type TodolistEntity = {
+    id: string
+    title: string
+    addedDate: string
+    order: number
 }

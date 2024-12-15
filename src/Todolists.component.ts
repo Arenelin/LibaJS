@@ -1,22 +1,12 @@
 import {ComponentLibaParam, Dispatch, LocalState, RenderParams, SetStateAction} from "types";
-import {createTodolist, deleteTodolist, getTodolists} from "./api/todolists";
+import {createTodolist, deleteTodolist, getTodolists, TodolistEntity} from "./api/todolists";
 import {TodolistComponent} from "./Todolist.component";
 
-export type TodolistEntity = {
-    id: string
-    title: string
-    addedDate: string
-    order: number
-}
-
-type TodolistsComponentLocalState = {
+type LocalComponentState = {
     todolists: LocalState<TodolistEntity[]>
     todolistTitle: LocalState<string>
     setTodolistTitle: Dispatch<SetStateAction<string>>
     createNewTodolist: () => void
-}
-
-type RenderProps = {
     removeTodolist: (id: string) => void
 }
 
@@ -27,17 +17,16 @@ export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
 
     console.log('App mount');
 
-    (function () {
-        getTodolists().then(r => setTodolists(r))
+    (async function () {
+        const todolists = await getTodolists()
+        setTodolists(todolists)
     })()
 
-    const createNewTodolist = () => {
+    const createNewTodolist = async () => {
         if (todolistTitle.value.length > 0 && todolistTitle.value.trim()) {
-            createTodolist(todolistTitle.value)
-                .then(newTodo => {
-                    setTodolistTitle('')
-                    setTodolists([newTodo, ...todolists.value])
-                })
+            const newTodolist = await createTodolist(todolistTitle.value)
+            setTodolistTitle('')
+            setTodolists([newTodolist, ...todolists.value])
         }
     }
 
@@ -48,12 +37,17 @@ export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
 
     return {
         element,
-        localState: {todolists, todolistTitle, setTodolistTitle, createNewTodolist},
-        props: {removeTodolist}
+        localState: {
+            todolists,
+            todolistTitle,
+            setTodolistTitle,
+            createNewTodolist,
+            removeTodolist
+        }
     };
 };
 
-TodolistsComponent.render = ({element, liba, localState, props}: RenderParams<RenderProps, TodolistsComponentLocalState>) => {
+TodolistsComponent.render = ({element, liba, localState}: RenderParams<LocalComponentState>) => {
 
     const input = document.createElement('input')
     input.value = localState.todolistTitle.value
@@ -64,21 +58,25 @@ TodolistsComponent.render = ({element, liba, localState, props}: RenderParams<Re
         localState.setTodolistTitle(newTitleValue)
     }
 
-    const addNewTodolist = () => {
-        input.value = ''
-        localState.createNewTodolist()
-    }
-
     input.addEventListener('change', onChangeHandler)
     element.append(input)
 
     const button = document.createElement('button')
     button.append('Create new todolist')
+
+    const addNewTodolist = () => {
+        input.value = ''
+        localState.createNewTodolist()
+    }
+
     button.addEventListener('click', addNewTodolist)
     element.append(button)
 
     localState.todolists.value.forEach((todolist) => {
-        const todolistInstance = liba.create(TodolistComponent, {todolist, removeTodolist: props.removeTodolist});
+        const todolistInstance = liba.create(TodolistComponent, {
+            todolist,
+            removeTodolist: localState.removeTodolist
+        });
         element.append(todolistInstance.element);
     });
 };

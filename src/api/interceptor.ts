@@ -1,5 +1,5 @@
 export const fetchInstance = async (url: string, init?: RequestInit) => {
-    return fetch(`https://social-network.samuraijs.com/api/1.1${url}`, {
+    const response = await fetch(`https://social-network.samuraijs.com/api/1.1${url}`, {
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -7,5 +7,12 @@ export const fetchInstance = async (url: string, init?: RequestInit) => {
         },
         ...init
     })
-        .then(r => r.json());
+    return response.json()
+}
+
+export type ServerResponse<T> = {
+    data: T
+    fieldsErrors: string[]
+    messages: string[]
+    resultCode: number
 }

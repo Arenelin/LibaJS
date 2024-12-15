@@ -1,6 +1,6 @@
 export type ComponentFn<P extends object = {}, L extends object = {}> = {
     (props: P, {liba}: ComponentLibaParam): ComponentInstance<P, L>
-    render: (params: RenderParams<P, L>) => void
+    render: (params: RenderParams<L, P>) => void
 }
 
 export type ComponentInstance<P extends object = {}, L extends object = {}> = {
@@ -14,7 +14,7 @@ export type ComponentInstance<P extends object = {}, L extends object = {}> = {
     childrenIndex?: number
 }
 
-export type RenderParams<P extends object = {}, L extends object = {}> = {
+export type RenderParams<L extends object = {}, P extends object = {}> = {
     element: HTMLElement
     props: P
     localState: L
@@ -58,9 +58,4 @@ export type RenderComponentParams<P extends object = {}, L extends object = {}> 
     renderLiba: RenderLiba
 }
 
-export type ServerResponse<T> = {
-    data: T
-    fieldsErrors: string[]
-    messages: string[]
-    resultCode: number
-}
+

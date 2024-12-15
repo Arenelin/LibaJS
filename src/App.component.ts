@@ -2,32 +2,31 @@ import {ComponentLibaParam, Dispatch, LocalState, RenderParams, SetStateAction} 
 import {CounterComponent} from "./Counter.component";
 import {TodolistsComponent} from "./Todolists.component";
 
-enum CurrentPage {
-    Todolists = 'todolists',
-    Counter = 'counter'
-}
+const CurrentPage =  {
+    Todolists: 'todolists',
+    Counter: 'counter'
+} as const
 
-type Props = {
-    setLocalState: Dispatch<SetStateAction<CurrentPage>>
+type EnumCurrentPage = (typeof CurrentPage)[keyof typeof CurrentPage]
+
+type LocalComponentState = {
+    currentPage: LocalState<EnumCurrentPage>
+    setCurrentPage: Dispatch<SetStateAction<EnumCurrentPage>>
 }
 
 export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    const [localState, setLocalState] = liba.useState(CurrentPage.Todolists)
+    const [currentPage, setCurrentPage] = liba.useState<EnumCurrentPage>(CurrentPage.Todolists)
 
     console.log('App mount');
-    const renderProps = {
-        setLocalState
-    }
 
     return {
         element,
-        localState,
-        props: renderProps
+        localState: {currentPage, setCurrentPage},
     };
 };
 
-AppComponent.render = ({element, localState, liba, props}: RenderParams<Props, LocalState<CurrentPage>>) => {
+AppComponent.render = ({element, localState, liba}: RenderParams<LocalComponentState>) => {
     const pageSelector = document.createElement('select');
     const counterPageOption = document.createElement('option');
     counterPageOption.value = CurrentPage.Counter;
@@ -40,16 +39,16 @@ AppComponent.render = ({element, localState, liba, props}: RenderParams<Props, L
 
     const onChangeCurrentPage = (e: Event) => {
         const selectHTMLElement = e.currentTarget as HTMLSelectElement;
-        props.setLocalState(selectHTMLElement.value as CurrentPage)
+        localState.setCurrentPage(selectHTMLElement.value as EnumCurrentPage)
     };
 
     pageSelector.addEventListener('change', onChangeCurrentPage);
-    pageSelector.value = localState.value;
+    pageSelector.value = localState.currentPage.value;
     element.append(pageSelector);
 
     console.log('App re-render');
 
-    switch (localState.value) {
+    switch (localState.currentPage.value) {
         case CurrentPage.Counter: {
             const counterInstance = liba.create(CounterComponent);
             element.append(counterInstance.element);

@@ -1,84 +1,64 @@
 import {ComponentLibaParam, Dispatch, LocalState, RenderParams, SetStateAction} from "types";
-import {TodolistEntity} from "./Todolists.component";
-import {
-    createTask,
-    deleteTask,
-    EnumTaskPriorities,
-    EnumTaskStatuses,
-    getTasks, TaskStatuses,
-    updateTask,
-    UpdateTaskModel
-} from "./api/tasks";
+import {createTask, deleteTask, getTasks, TaskEntity, TaskStatuses, updateTask, UpdateTaskModel} from "./api/tasks";
 import {TaskComponent} from "./Task.component";
+import {TodolistEntity} from "./api/todolists";
 
-export type TaskEntity = {
-    description: string
-    title: string
-    completed: boolean
-    status: EnumTaskStatuses
-    priority: EnumTaskPriorities
-    startDate: string
-    deadline: string
-    id: string
-    todoListId: string
-    order: number
-    addedDate: string
-};
+const TaskFilter =  {
+    All: 'all',
+    Active: 'active',
+    Completed: 'completed',
+} as const
 
-type Filter = 'all' | 'active' | 'completed'
+type EnumTaskFilter = (typeof TaskFilter)[keyof typeof TaskFilter]
 
 type Props = {
     todolist: TodolistEntity
     removeTodolist: (id: string) => void
 }
 
-type TodolistComponentLocalState = {
+type LocalComponentState = {
     tasks: LocalState<TaskEntity[]>
-    currentFilter: LocalState<Filter>
     taskTitle: LocalState<string>
+    currentFilter: LocalState<EnumTaskFilter>
     setTaskTitle: Dispatch<SetStateAction<string>>
     createNewTask: () => void
     updateTaskHandler: (taskId: string, model: UpdateTaskModel) => void
     removeTask: (taskId: string) => void
-    filterTasks: (filterValue: Filter) => void
+    filterTasks: (filterValue: EnumTaskFilter) => void
 }
 
-export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
+export const TodolistComponent = ({todolist, removeTodolist}: Props, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
     const [tasks, setTasks] = liba.useState<TaskEntity[]>([])
-    const [taskTitle, setTaskTitle] = liba.useState('')
-    const [currentFilter, setCurrentFilter] = liba.useState<Filter>('all')
+    const [newTaskTitle, setNewTaskTitle] = liba.useState('')
+    const [currentFilter, setCurrentFilter] = liba.useState<EnumTaskFilter>(TaskFilter.All)
 
     console.log('Todolist mount');
 
-    (function () {
-        getTasks(props.todolist.id).then(r => setTasks(r))
+    (async function () {
+        const tasks = await getTasks(todolist.id)
+        setTasks(tasks)
     })()
 
-    const createNewTask = () => {
-        if (taskTitle.value.length > 0 && taskTitle.value.trim()) {
-            createTask({todolistId: props.todolist.id, title: taskTitle.value})
-                .then(newTask => {
-                    setTaskTitle('')
-                    setTasks([newTask, ...tasks.value])
-                })
+    const createNewTask = async () => {
+        if (newTaskTitle.value.length > 0 && newTaskTitle.value.trim()) {
+            const newTask = await createTask({todolistId: todolist.id, title: newTaskTitle.value})
+            setNewTaskTitle('')
+            setTasks([newTask, ...tasks.value])
         }
     }
 
     const updateTaskHandler = async (taskId: string, model: UpdateTaskModel) => {
-        updateTask({
-            todolistId: props.todolist.id,
-            taskId,
-            model,
-        }).then(() => setTasks(tasks.value.map(t => t.id === taskId ? {...t, ...model} : t)))
+        await updateTask({todolistId: todolist.id, taskId, model})
+        setTasks(tasks.value.map(t => t.id === taskId ? {...t, ...model} : t))
     }
 
-    const removeTask = (taskId: string) => {
-        deleteTask({todolistId: props.todolist.id, taskId})
-            .then(() => setTasks(tasks.value.filter(t => t.id !== taskId)))
+    const removeTask = async (taskId: string) => {
+        await deleteTask({todolistId: todolist.id, taskId})
+        setTasks(tasks.value.filter(t => t.id !== taskId))
     }
 
-    const filterTasks = (filterValue: Filter) => {
+    const filterTasks = (filterValue: EnumTaskFilter) => {
         setCurrentFilter(filterValue)
     }
 
@@ -88,34 +68,34 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
             tasks,
             createNewTask,
             removeTask,
-            setTaskTitle,
-            taskTitle,
+            setTaskTitle: setNewTaskTitle,
+            taskTitle: newTaskTitle,
             updateTaskHandler,
             filterTasks,
             currentFilter
         },
-        props
+        props: {todolist, removeTodolist}
     };
 };
 
-TodolistComponent.render = ({element, props, localState, liba}: RenderParams<Props, TodolistComponentLocalState>) => {
+TodolistComponent.render = ({element, props, localState, liba}: RenderParams<LocalComponentState, Props>) => {
     const title = document.createElement('h2');
     title.append(props.todolist.title);
     element.append(title);
 
     const allButton = document.createElement('button')
     allButton.append('Show all tasks')
-    allButton.addEventListener('click', () => localState.filterTasks('all'))
+    allButton.addEventListener('click', () => localState.filterTasks(TaskFilter.All))
     element.append(allButton)
 
     const activeButton = document.createElement('button')
     activeButton.append('Show only active tasks')
-    activeButton.addEventListener('click', () => localState.filterTasks('active'))
+    activeButton.addEventListener('click', () => localState.filterTasks(TaskFilter.Active))
     element.append(activeButton)
 
     const completedButton = document.createElement('button')
     completedButton.append('Show only completed tasks')
-    completedButton.addEventListener('click', () => localState.filterTasks('completed'))
+    completedButton.addEventListener('click', () => localState.filterTasks(TaskFilter.Completed))
     element.append(completedButton)
 
     const removeButton = document.createElement('button')
@@ -132,23 +112,24 @@ TodolistComponent.render = ({element, props, localState, liba}: RenderParams<Pro
         localState.setTaskTitle(newTitleValue)
     }
 
-    const addNewTask = () => {
-        input.value = ''
-        localState.createNewTask()
-    }
-
     input.addEventListener('change', onChangeHandler)
     element.append(input)
 
     const button = document.createElement('button')
     button.append('Create new task')
+
+    const addNewTask = () => {
+        input.value = ''
+        localState.createNewTask()
+    }
+
     button.addEventListener('click', addNewTask)
     element.append(button)
 
     console.log('Todolist re-render');
 
-    const filteredTasks = localState.currentFilter.value !== 'all'
-        ? localState.tasks.value.filter(t => localState.currentFilter.value === 'active'
+    const filteredTasks = localState.currentFilter.value !== TaskFilter.All
+        ? localState.tasks.value.filter(t => localState.currentFilter.value === TaskFilter.Active
             ? t.status === TaskStatuses.New
             : t.status === TaskStatuses.Completed)
         : localState.tasks.value
@@ -161,5 +142,4 @@ TodolistComponent.render = ({element, props, localState, liba}: RenderParams<Pro
         });
         element.append(taskInstance.element);
     });
-    console.log(localState.tasks.value)
 };
