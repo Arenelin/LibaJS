@@ -21,7 +21,11 @@ export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
 };
 
 AppComponent.render = ({element, statesWithWrappers, liba}: RenderParams) => {
-    const [currentPage, setCurrentPage] = statesWithWrappers[0] as [EnumCurrentPage, Dispatch<SetStateAction<EnumCurrentPage>>]
+    const FIRST_STATE_INDEX = 0
+
+    const [currentPage, setCurrentPage] = statesWithWrappers[FIRST_STATE_INDEX] as [
+        EnumCurrentPage, Dispatch<SetStateAction<EnumCurrentPage>>
+    ]
 
     const pageSelector = document.createElement('select');
     const counterPageOption = document.createElement('option');

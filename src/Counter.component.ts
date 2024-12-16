@@ -18,7 +18,9 @@ export const CounterComponent = ({}, {liba}: ComponentLibaParam) => {
 }
 
 CounterComponent.render = ({element, statesWithWrappers}: RenderParams) => {
-    const [count] = statesWithWrappers[0] as [number, Dispatch<SetStateAction<number>>]
+    const FIRST_STATE_INDEX = 0
+
+    const [count] = statesWithWrappers[FIRST_STATE_INDEX] as [number, Dispatch<SetStateAction<number>>]
     element.append(count.toString());
     console.log('Counter re-render');
 };

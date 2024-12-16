@@ -20,8 +20,15 @@ export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
 };
 
 TodolistsComponent.render = ({element, liba, statesWithWrappers}: RenderParams) => {
-    const [todolists, setTodolists] = statesWithWrappers[0] as [TodolistEntity[], Dispatch<SetStateAction<TodolistEntity[]>>]
-    const [todolistTitle, setTodolistTitle] = statesWithWrappers[1] as [string, Dispatch<SetStateAction<string>>]
+    const FIRST_STATE_INDEX = 0
+    const SECOND_STATE_INDEX = 1
+
+    const [todolists, setTodolists] = statesWithWrappers[FIRST_STATE_INDEX] as [
+        TodolistEntity[], Dispatch<SetStateAction<TodolistEntity[]>>
+    ]
+    const [todolistTitle, setTodolistTitle] = statesWithWrappers[SECOND_STATE_INDEX] as [
+        string, Dispatch<SetStateAction<string>>
+    ]
 
     const createNewTodolist = async () => {
         if (todolistTitle.length > 0 && todolistTitle.trim()) {

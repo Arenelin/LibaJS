@@ -36,9 +36,19 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
 };
 
 TodolistComponent.render = ({element, props, liba, statesWithWrappers}: RenderParams<Props>) => {
-    const [tasks, setTasks] = statesWithWrappers[0] as [TaskEntity[], Dispatch<SetStateAction<TaskEntity[]>>]
-    const [newTaskTitle, setNewTaskTitle] = statesWithWrappers[1] as [string, Dispatch<SetStateAction<string>>]
-    const [currentFilter, setCurrentFilter] = statesWithWrappers[2] as [EnumTaskFilter, Dispatch<SetStateAction<EnumTaskFilter>>]
+    const FIRST_STATE_INDEX = 0
+    const SECOND_STATE_INDEX = 1
+    const THIRD_STATE_INDEX = 2
+
+    const [tasks, setTasks] = statesWithWrappers[FIRST_STATE_INDEX] as [
+        TaskEntity[], Dispatch<SetStateAction<TaskEntity[]>>
+    ]
+    const [newTaskTitle, setNewTaskTitle] = statesWithWrappers[SECOND_STATE_INDEX] as [
+        string, Dispatch<SetStateAction<string>>
+    ]
+    const [currentFilter, setCurrentFilter] = statesWithWrappers[THIRD_STATE_INDEX] as [
+        EnumTaskFilter, Dispatch<SetStateAction<EnumTaskFilter>>
+    ]
 
     const createNewTask = async () => {
         if (newTaskTitle.length > 0 && newTaskTitle.trim()) {
