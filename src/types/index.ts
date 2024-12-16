@@ -1,24 +1,23 @@
-export type ComponentFn<P extends object = {}, L extends object = {}> = {
-    (props: P, {liba}: ComponentLibaParam): ComponentInstance<P, L>
-    render: (params: RenderParams<L, P>) => void
+export type ComponentFn<P extends object = {}> = {
+    (props: P, {liba}: ComponentLibaParam): ComponentInstance<P>
+    render: (params: RenderParams<P>) => void
 }
 
-export type ComponentInstance<P extends object = {}, L extends object = {}> = {
+export type ComponentInstance<P extends object = {}> = {
     element: HTMLElement
     props?: P
-    localState?: L
     cleanup?: () => void
-    type?: ComponentFn<P, L>
+    type?: ComponentFn<P>
     refresh?: () => void
-    childrenComponents?: ComponentInstance<P, L>[]
+    childrenComponents?: ComponentInstance<P>[]
     childrenIndex?: number
 }
 
-export type RenderParams<L extends object = {}, P extends object = {}> = {
+export type RenderParams<P extends object = {}> = {
     element: HTMLElement
     props: P
-    localState: L
     liba: RenderLiba
+    statesWithWrappers: [any, Dispatch<SetStateAction<any>>][]
 }
 
 export type LocalState<S> = {
@@ -31,7 +30,7 @@ export type Dispatch<A> = (value: A) => void;
 
 export type ComponentLiba = {
     refresh: () => void
-    useState: <S>(initialState: S | (() => S)) => [LocalState<S>, Dispatch<SetStateAction<S>>]
+    useState: <S>(initialState: S | (() => S)) => [S, Dispatch<SetStateAction<S>>]
 }
 
 export type ComponentLibaParam = {
@@ -39,23 +38,22 @@ export type ComponentLibaParam = {
 }
 
 export type RenderLiba = {
-    create: <P extends object = {}, L extends object = {}>(ChildrenComponentFunction: ComponentFn<P, L>, props?: P)
-        => ComponentInstance<P, L>
+    create: <P extends object = {}>(ChildrenComponentFunction: ComponentFn<P>, props?: P)
+        => ComponentInstance<P>
     refresh: () => void
 }
 
-export type ParentInstance<P extends object = {}, L extends object = {}> = ComponentInstance<P, L> | null
+export type ParentInstance<P extends object = {}> = ComponentInstance<P> | null
 
-export type CreateComponentParams<P extends object = {}, L extends object = {}> = {
-    ComponentFunction: ComponentFn<P, L>
+export type CreateComponentParams<P extends object = {}> = {
+    ComponentFunction: ComponentFn<P>
     props?: object
-    parentInstance?: ParentInstance<any, any>
+    parentInstance?: ParentInstance<any>
 }
 
-export type RenderComponentParams<P extends object = {}, L extends object = {}> = {
-    ComponentFunction: ComponentFn<P, L>
-    componentInstance: ComponentInstance<P, L>
+export type RenderComponentParams<S, P extends object = {}> = {
+    ComponentFunction: ComponentFn<P>
+    componentInstance: ComponentInstance<P>
     renderLiba: RenderLiba
+    statesWithWrappers: [LocalState<S>, Dispatch<SetStateAction<S>>][]
 }
-
-

@@ -12,26 +12,37 @@ import {
 
 
 export const Liba = {
-    create<P extends object, L extends object>(
+    create<P extends object>(
         {
             ComponentFunction,
             props = {},
             parentInstance = null
-        }: CreateComponentParams<P, L>) {
+        }: CreateComponentParams<P>) {
+
+        const statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][] = []
 
         const renderLiba: RenderLiba = {
-            create<P extends object, L extends object>(ComponentFunction: ComponentFn<P, L>, props = {}) {
-                return createChildrenComponent({ComponentFunction, props, parentInstance: componentInstance})
+            create<P extends object>(ComponentFunction: ComponentFn<P>, props = {}) {
+                return createChildrenComponent({
+                    ComponentFunction,
+                    props,
+                    parentInstance: componentInstance
+                })
             },
             refresh() {
                 cleanComponent(componentInstance)
-                renderComponent({ComponentFunction, componentInstance, renderLiba})
+                renderComponent({
+                    ComponentFunction,
+                    componentInstance,
+                    renderLiba,
+                    statesWithWrappers
+                })
             }
         }
 
         const componentLiba: ComponentLiba = {
             refresh: renderLiba.refresh,
-            useState<S>(initialState: S | (() => S)): [LocalState<S>, Dispatch<SetStateAction<S>>] {
+            useState<S>(initialState: S | (() => S)): [S, Dispatch<SetStateAction<S>>] {
                 const state: LocalState<S> = {
                     value: typeof initialState === 'function'
                         ? (initialState as () => S)()
@@ -44,8 +55,9 @@ export const Liba = {
                         : newState;
                     componentLiba.refresh();
                 };
+                statesWithWrappers.push([state, setState])
 
-                return [state, setState];
+                return [state.value, setState];
             }
         };
 
@@ -60,18 +72,23 @@ export const Liba = {
             }
         }
 
-        renderComponent({ComponentFunction, componentInstance, renderLiba})
+        renderComponent({
+            ComponentFunction,
+            componentInstance,
+            renderLiba,
+            statesWithWrappers
+        })
 
         return componentInstance
     }
 }
 
-function createChildrenComponent<P extends object, L extends object>(
+function createChildrenComponent<P extends object>(
     {
         ComponentFunction,
-        props = {},
+        props = {} as P,
         parentInstance
-    }: CreateComponentParams<P, L>): ComponentInstance<P, L> {
+    }: CreateComponentParams<P>): ComponentInstance<P> {
 
     if (parentInstance) {
         if (parentInstance.childrenIndex === undefined) {
@@ -82,7 +99,7 @@ function createChildrenComponent<P extends object, L extends object>(
 
         if (alreadyExistedComponentInstance) {
             if (alreadyExistedComponentInstance.type &&
-                (alreadyExistedComponentInstance.type as ComponentFn<P, L>) === ComponentFunction) {
+                (alreadyExistedComponentInstance.type as ComponentFn<P>) === ComponentFunction) {
                 if (alreadyExistedComponentInstance.props && propsTheSame(alreadyExistedComponentInstance.props, props)) {
                     return alreadyExistedComponentInstance
                 } else {
@@ -99,23 +116,24 @@ function createChildrenComponent<P extends object, L extends object>(
     return Liba.create({ComponentFunction, props, parentInstance})
 }
 
-function renderComponent<P extends object, L extends object>(
+function renderComponent<S, P extends object>(
     {
         ComponentFunction,
         componentInstance,
-        renderLiba
-    }: RenderComponentParams<P, L>) {
+        renderLiba,
+        statesWithWrappers
+    }: RenderComponentParams<S, P>) {
     componentInstance.childrenIndex = -1
 
     ComponentFunction.render({
         element: componentInstance.element,
         props: (componentInstance.props) as P,
-        localState: (componentInstance.localState) as L,
+        statesWithWrappers: statesWithWrappers.map(swws => [swws[0].value, swws[1]]),
         liba: renderLiba
     })
 }
 
-function cleanComponent<P extends object, L extends object>(componentInstance: ComponentInstance<P, L>) {
+function cleanComponent<P extends object>(componentInstance: ComponentInstance<P>) {
     componentInstance.element.innerHTML = ''
     componentInstance.childrenComponents?.forEach(cc => cc.cleanup?.())
 }
