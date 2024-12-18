@@ -15,7 +15,6 @@ export const Liba = {
         {
             ComponentFunction,
             props = {},
-            // parentInstance = null
         }: CreateComponentParams<P>) {
 
         const statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][] = []
@@ -60,7 +59,6 @@ export const Liba = {
                 return [state.value, setState];
             }
         };
-        debugger
         const componentInstance = ComponentFunction(props as P, {liba: componentLiba})
         componentInstance.type = ComponentFunction
         componentInstance.props = props as P
@@ -84,39 +82,65 @@ function createChildrenComponent<P extends object>(
         parentInstance,
         key
     }: CreateComponentParams<P>): ComponentInstance<P> {
-    debugger
-    if (parentInstance && parentInstance?.childrenComponentsOfCurrentRender === undefined){
-        parentInstance.childrenComponentsOfCurrentRender = []
+    const arrayOfStaticInstances: ComponentInstance<P>[] = []
+    const arrayOfDynamicInstances: ComponentInstance<P>[] = []
+    const INDEX_OF_STATIC_INSTANCES = 0
+    const INDEX_OF_DYNAMIC_INSTANCES = 1
+    const isRenderedDynamically = key !== undefined
+
+    if (parentInstance && parentInstance?.childrenComponentsOfCurrentRender === undefined) {
+        parentInstance.childrenComponentsOfCurrentRender = [arrayOfStaticInstances, arrayOfDynamicInstances]
     }
 
     if (parentInstance) {
-        debugger
-        const alreadyExistedComponentInstance = parentInstance.childrenComponents
-            ?.find(cc => cc.key === key)
+        let alreadyExistedComponentInstance;
+
+        if (isRenderedDynamically) {
+            alreadyExistedComponentInstance = parentInstance.childrenComponents?.[INDEX_OF_DYNAMIC_INSTANCES]
+                ?.find(cc => cc.key === key)
+        } else {
+            if (parentInstance.childrenIndex === undefined) {
+                parentInstance.childrenIndex = -1
+            }
+            parentInstance.childrenIndex++
+            alreadyExistedComponentInstance = parentInstance.childrenComponents?.[INDEX_OF_STATIC_INSTANCES][parentInstance.childrenIndex]
+        }
 
         if (alreadyExistedComponentInstance) {
             if (alreadyExistedComponentInstance.type &&
                 (alreadyExistedComponentInstance.type as ComponentFn<P>) === ComponentFunction) {
                 if (alreadyExistedComponentInstance.props && propsTheSame(alreadyExistedComponentInstance.props, props)) {
-                    alreadyExistedComponentInstance.key = key
-                    parentInstance.childrenComponentsOfCurrentRender?.push(alreadyExistedComponentInstance)
+                    if (isRenderedDynamically) {
+                        alreadyExistedComponentInstance.key = key
+                        parentInstance.childrenComponentsOfCurrentRender?.[INDEX_OF_DYNAMIC_INSTANCES].push(alreadyExistedComponentInstance)
+                    } else if(!isRenderedDynamically && parentInstance.childrenIndex !== undefined && parentInstance.childrenComponentsOfCurrentRender){
+                        parentInstance.childrenComponentsOfCurrentRender[INDEX_OF_STATIC_INSTANCES][parentInstance.childrenIndex] = alreadyExistedComponentInstance
+                    }
                     return alreadyExistedComponentInstance
                 } else {
                     alreadyExistedComponentInstance.props = props
                     alreadyExistedComponentInstance.refresh?.()
-                    alreadyExistedComponentInstance.key = key
-                    parentInstance.childrenComponentsOfCurrentRender?.push(alreadyExistedComponentInstance)
+                    if (isRenderedDynamically) {
+                        alreadyExistedComponentInstance.key = key
+                        parentInstance.childrenComponentsOfCurrentRender?.[INDEX_OF_DYNAMIC_INSTANCES].push(alreadyExistedComponentInstance)
+                    } else if(!isRenderedDynamically && parentInstance.childrenIndex !== undefined && parentInstance.childrenComponentsOfCurrentRender) {
+                        parentInstance.childrenComponentsOfCurrentRender[INDEX_OF_STATIC_INSTANCES][parentInstance.childrenIndex] = alreadyExistedComponentInstance
+                    }
                     return alreadyExistedComponentInstance
                 }
+            } else if (!isRenderedDynamically && parentInstance.childrenIndex) {
+                parentInstance.childrenComponentsOfCurrentRender?.[INDEX_OF_STATIC_INSTANCES].splice(parentInstance.childrenIndex, 1)
             }
         }
     }
 
     const childrenInstance = Liba.create({ComponentFunction, props, parentInstance})
-    debugger
-    childrenInstance.key = key
-    parentInstance?.childrenComponentsOfCurrentRender?.push(childrenInstance)
-    debugger
+    if (isRenderedDynamically) {
+        childrenInstance.key = key
+        parentInstance?.childrenComponentsOfCurrentRender?.[INDEX_OF_DYNAMIC_INSTANCES].push(childrenInstance)
+    } else if(!isRenderedDynamically && parentInstance && parentInstance.childrenIndex !== undefined && parentInstance.childrenComponentsOfCurrentRender) {
+        parentInstance.childrenComponentsOfCurrentRender[INDEX_OF_STATIC_INSTANCES][parentInstance.childrenIndex] = childrenInstance
+    }
     return childrenInstance
 }
 
@@ -128,6 +152,8 @@ function renderComponent<S, P extends object>(
         statesWithWrappers
     }: RenderComponentParams<S, P>) {
 
+    componentInstance.childrenIndex = -1
+
     ComponentFunction.render({
         element: componentInstance.element,
         props: (componentInstance.props) as P,
@@ -135,13 +161,12 @@ function renderComponent<S, P extends object>(
         liba: renderLiba
     })
     componentInstance.childrenComponents = componentInstance.childrenComponentsOfCurrentRender
-    componentInstance.childrenComponentsOfCurrentRender = []
-    debugger
+    componentInstance.childrenComponentsOfCurrentRender = [[], []]
 }
 
 function cleanComponent<P extends object>(componentInstance: ComponentInstance<P>) {
     componentInstance.element.innerHTML = ''
-    componentInstance.childrenComponents?.forEach(cc => cc.cleanup?.())
+    componentInstance.childrenComponents?.forEach(cc => cc.forEach(cc => cc.cleanup?.()))
 }
 
 // function ensureChildren(parent: ParentInstance) {

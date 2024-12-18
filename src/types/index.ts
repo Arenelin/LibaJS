@@ -11,8 +11,8 @@ export type ComponentInstance<P extends object = {}> = {
     type?: ComponentFn<P>
     refresh?: () => void
     key?: string | number
-    childrenComponents?: { key?: string | number } & ComponentInstance<P>[]
-    childrenComponentsOfCurrentRender?: { key?: string | number } & ComponentInstance<P>[]
+    childrenComponents?: [ComponentInstance<P>[], ComponentInstance<P>[]]
+    childrenComponentsOfCurrentRender?: [ComponentInstance<P>[], ComponentInstance<P>[]]
     childrenIndex?: number
 }
 

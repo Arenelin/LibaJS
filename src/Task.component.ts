@@ -22,7 +22,6 @@ export const TaskComponent = ({}, {liba}: ComponentLibaParam) => {
 }
 
 TaskComponent.render = ({element, props}: RenderParams<Props>) => {
-    debugger
     element.append(props.task.title)
     const checkbox = document.createElement('input')
     checkbox.type = 'checkbox'
