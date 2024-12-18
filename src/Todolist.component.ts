@@ -26,12 +26,12 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
 
     (async function () {
         const tasks = await getTasks(props.todolist.id)
+        debugger
         setTasks(tasks)
     })()
 
     return {
-        element,
-        props
+        element
     };
 };
 
@@ -123,11 +123,13 @@ TodolistComponent.render = ({element, props, liba, statesWithWrappers}: RenderPa
         : tasks
 
     filteredTasks.forEach((task: TaskEntity) => {
+        debugger
         const taskInstance = liba.create(TaskComponent, {
-            task,
-            updateTask: updateTaskHandler,
-            removeTask
-        });
+                task,
+                updateTask: updateTaskHandler,
+                removeTask
+            },
+            task.id);
         element.append(taskInstance.element);
     });
 };

@@ -4,29 +4,29 @@ import {
     ComponentLiba,
     CreateComponentParams,
     Dispatch,
-    LocalState, ParentInstance,
+    LocalState,
     RenderComponentParams,
     RenderLiba,
     SetStateAction
 } from "types";
-
 
 export const Liba = {
     create<P extends object>(
         {
             ComponentFunction,
             props = {},
-            parentInstance = null
+            // parentInstance = null
         }: CreateComponentParams<P>) {
 
         const statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][] = []
 
         const renderLiba: RenderLiba = {
-            create<P extends object>(ComponentFunction: ComponentFn<P>, props = {}) {
+            create<P extends object>(ComponentFunction: ComponentFn<P>, props = {}, key?: string | number) {
                 return createChildrenComponent({
                     ComponentFunction,
                     props,
-                    parentInstance: componentInstance
+                    parentInstance: componentInstance,
+                    key
                 })
             },
             refresh() {
@@ -60,17 +60,11 @@ export const Liba = {
                 return [state.value, setState];
             }
         };
-
+        debugger
         const componentInstance = ComponentFunction(props as P, {liba: componentLiba})
         componentInstance.type = ComponentFunction
+        componentInstance.props = props as P
         componentInstance.refresh = componentLiba.refresh
-
-        if (parentInstance) {
-            ensureChildren(parentInstance)
-            if (parentInstance.childrenComponents && parentInstance.childrenIndex !== undefined) {
-                parentInstance.childrenComponents[parentInstance.childrenIndex] = componentInstance
-            }
-        }
 
         renderComponent({
             ComponentFunction,
@@ -87,33 +81,43 @@ function createChildrenComponent<P extends object>(
     {
         ComponentFunction,
         props = {} as P,
-        parentInstance
+        parentInstance,
+        key
     }: CreateComponentParams<P>): ComponentInstance<P> {
+    debugger
+    if (parentInstance && parentInstance?.childrenComponentsOfCurrentRender === undefined){
+        parentInstance.childrenComponentsOfCurrentRender = []
+    }
 
     if (parentInstance) {
-        if (parentInstance.childrenIndex === undefined) {
-            parentInstance.childrenIndex = -1
-        }
-        parentInstance.childrenIndex++
-        const alreadyExistedComponentInstance = parentInstance.childrenComponents?.[parentInstance?.childrenIndex]
+        debugger
+        const alreadyExistedComponentInstance = parentInstance.childrenComponents
+            ?.find(cc => cc.key === key)
 
         if (alreadyExistedComponentInstance) {
             if (alreadyExistedComponentInstance.type &&
                 (alreadyExistedComponentInstance.type as ComponentFn<P>) === ComponentFunction) {
                 if (alreadyExistedComponentInstance.props && propsTheSame(alreadyExistedComponentInstance.props, props)) {
+                    alreadyExistedComponentInstance.key = key
+                    parentInstance.childrenComponentsOfCurrentRender?.push(alreadyExistedComponentInstance)
                     return alreadyExistedComponentInstance
                 } else {
                     alreadyExistedComponentInstance.props = props
                     alreadyExistedComponentInstance.refresh?.()
+                    alreadyExistedComponentInstance.key = key
+                    parentInstance.childrenComponentsOfCurrentRender?.push(alreadyExistedComponentInstance)
                     return alreadyExistedComponentInstance
                 }
-            } else {
-                parentInstance.childrenComponents?.splice(parentInstance.childrenIndex, 1)
             }
         }
     }
 
-    return Liba.create({ComponentFunction, props, parentInstance})
+    const childrenInstance = Liba.create({ComponentFunction, props, parentInstance})
+    debugger
+    childrenInstance.key = key
+    parentInstance?.childrenComponentsOfCurrentRender?.push(childrenInstance)
+    debugger
+    return childrenInstance
 }
 
 function renderComponent<S, P extends object>(
@@ -123,7 +127,6 @@ function renderComponent<S, P extends object>(
         renderLiba,
         statesWithWrappers
     }: RenderComponentParams<S, P>) {
-    componentInstance.childrenIndex = -1
 
     ComponentFunction.render({
         element: componentInstance.element,
@@ -131,6 +134,9 @@ function renderComponent<S, P extends object>(
         statesWithWrappers: statesWithWrappers.map(swws => [swws[0].value, swws[1]]),
         liba: renderLiba
     })
+    componentInstance.childrenComponents = componentInstance.childrenComponentsOfCurrentRender
+    componentInstance.childrenComponentsOfCurrentRender = []
+    debugger
 }
 
 function cleanComponent<P extends object>(componentInstance: ComponentInstance<P>) {
@@ -138,13 +144,13 @@ function cleanComponent<P extends object>(componentInstance: ComponentInstance<P
     componentInstance.childrenComponents?.forEach(cc => cc.cleanup?.())
 }
 
-function ensureChildren(parent: ParentInstance) {
-    if (parent) {
-        if (!parent.childrenComponents) {
-            parent.childrenComponents = []
-        }
-    }
-}
+// function ensureChildren(parent: ParentInstance) {
+//     if (parent) {
+//         if (!parent.childrenComponents) {
+//             parent.childrenComponents = []
+//         }
+//     }
+// }
 
 function propsTheSame(prevProps: Record<string, any>, newProps: Record<string, any>) {
     if (prevProps === newProps) {

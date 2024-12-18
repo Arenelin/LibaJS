@@ -11,18 +11,18 @@ type UpdatedTaskFields = {
     [key: string]: EnumTaskStatuses | EnumTaskPriorities | string
 }
 
-export const TaskComponent = (props: Props, {liba}: ComponentLibaParam) => {
+export const TaskComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div')
     console.log('Task mount')
     console.log(liba)
 
     return {
-        element,
-        props,
+        element
     }
 }
 
 TaskComponent.render = ({element, props}: RenderParams<Props>) => {
+    debugger
     element.append(props.task.title)
     const checkbox = document.createElement('input')
     checkbox.type = 'checkbox'

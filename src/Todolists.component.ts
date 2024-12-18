@@ -11,6 +11,7 @@ export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
 
     (async function () {
         const todolists = await getTodolists()
+        debugger
         setTodolists(todolists)
     })()
 
@@ -33,13 +34,15 @@ TodolistsComponent.render = ({element, liba, statesWithWrappers}: RenderParams) 
     const createNewTodolist = async () => {
         if (todolistTitle.length > 0 && todolistTitle.trim()) {
             const newTodolist = await createTodolist(todolistTitle)
-            setTodolistTitle('')
+            debugger
             setTodolists([newTodolist, ...todolists])
+            setTodolistTitle('')
         }
     }
 
     const removeTodolist = async (id: string) => {
         await deleteTodolist(id)
+        debugger
         setTodolists(todolists.filter(t => t.id !== id))
     }
 
@@ -62,10 +65,12 @@ TodolistsComponent.render = ({element, liba, statesWithWrappers}: RenderParams) 
     element.append(button)
 
     todolists.forEach(todolist => {
+        debugger
         const todolistInstance = liba.create(TodolistComponent, {
-            todolist,
-            removeTodolist
-        });
+                todolist,
+                removeTodolist
+            },
+            todolist.id);
         element.append(todolistInstance.element);
     });
 };

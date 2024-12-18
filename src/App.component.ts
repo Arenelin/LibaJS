@@ -7,6 +7,9 @@ const CurrentPage = {
     Counter: 'counter'
 } as const
 
+const COUNTER_KEY = 'COUNTER_KEY'
+const TODOLISTS_KEY = 'TODOLISTS_KEY'
+
 type EnumCurrentPage = (typeof CurrentPage)[keyof typeof CurrentPage]
 
 export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
@@ -50,12 +53,12 @@ AppComponent.render = ({element, statesWithWrappers, liba}: RenderParams) => {
 
     switch (currentPage) {
         case CurrentPage.Counter: {
-            const counterInstance = liba.create(CounterComponent);
+            const counterInstance = liba.create(CounterComponent, {}, COUNTER_KEY);
             element.append(counterInstance.element);
             break;
         }
         case CurrentPage.Todolists: {
-            const todolistsInstance = liba.create(TodolistsComponent);
+            const todolistsInstance = liba.create(TodolistsComponent, {}, TODOLISTS_KEY);
             element.append(todolistsInstance.element);
             break;
         }
