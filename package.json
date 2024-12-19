@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "http-server -p 3000",
-    "build": "tsc"
+    "build": "tsc && node fix-imports.ts"
   },
   "dependencies": {
     "http-server": "^14.1.1",
