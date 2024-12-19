@@ -1,7 +1,6 @@
 export type ComponentFn<P extends object = {}> = {
     (props: P, {liba}: ComponentLibaParam): ComponentInstance<P>
     render: (params: RenderParams<P>) => void
-    key?: string | number
 }
 
 export type ComponentInstance<P extends object = {}> = {
@@ -11,7 +10,7 @@ export type ComponentInstance<P extends object = {}> = {
     type?: ComponentFn<P>
     refresh?: () => void
     key?: string | number
-    childrenComponents?: [ComponentInstance<P>[], ComponentInstance<P>[]]
+    childrenComponents?: [ComponentInstance<any>[], ComponentInstance<any>[]]
     childrenComponentsOfCurrentRender?: [ComponentInstance<any>[], ComponentInstance<any>[]]
     childrenIndex?: number
 }
