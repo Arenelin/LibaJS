@@ -12,7 +12,7 @@ export type ComponentInstance<P extends object = {}> = {
     refresh?: () => void
     key?: string | number
     childrenComponents?: [ComponentInstance<P>[], ComponentInstance<P>[]]
-    childrenComponentsOfCurrentRender?: [ComponentInstance<P>[], ComponentInstance<P>[]]
+    childrenComponentsOfCurrentRender?: [ComponentInstance<any>[], ComponentInstance<any>[]]
     childrenIndex?: number
 }
 
