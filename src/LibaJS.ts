@@ -147,7 +147,9 @@ function renderComponent<S, P extends object>(
 }
 
 function cleanComponent<P extends object>(componentInstance: ComponentInstance<P>) {
-    componentInstance.element.innerHTML = ''
+    if ("innerHTML" in componentInstance.element) {
+        componentInstance.element.innerHTML = ''
+    }
     componentInstance.childrenComponents?.forEach(cc => cc.forEach(cc => cc.cleanup?.()))
 }
 
