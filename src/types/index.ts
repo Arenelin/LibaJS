@@ -19,7 +19,7 @@ export type RenderParams<P extends object = {}> = {
     element: HTMLElement
     props: P
     liba: RenderLiba
-    statesWithWrappers: [any, Dispatch<SetStateAction<any>>][]
+    statesWithWrappers: LocalState<any>[]
 }
 
 export type LocalState<S> = {
@@ -32,7 +32,7 @@ export type Dispatch<A> = (value: A) => void;
 
 export type ComponentLiba = {
     refresh: () => void
-    useState: <S>(initialState: S | (() => S)) => [S, Dispatch<SetStateAction<S>>]
+    useObservable: <S>(initialState: LocalState<S>) => LocalState<S>
 }
 
 export type ComponentLibaParam = {
@@ -54,9 +54,9 @@ export type CreateComponentParams<P extends object = {}> = {
     key?: string | number
 }
 
-export type RenderComponentParams<S, P extends object = {}> = {
+export type RenderComponentParams<P extends object = {}> = {
     ComponentFunction: ComponentFn<P>
     componentInstance: ComponentInstance<P>
     renderLiba: RenderLiba
-    statesWithWrappers: [LocalState<S>, Dispatch<SetStateAction<S>>][]
+    statesWithWrappers: LocalState<any>[]
 }

@@ -1,4 +1,4 @@
-import {ComponentLibaParam, Dispatch, RenderParams, SetStateAction} from "types";
+import {ComponentLibaParam, LocalState, RenderParams} from "types";
 import {CounterComponent} from "./Counter.component";
 import {TodolistsComponent} from "./Todolists.component";
 
@@ -11,7 +11,7 @@ type EnumCurrentPage = (typeof CurrentPage)[keyof typeof CurrentPage]
 
 export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    liba.useState<EnumCurrentPage>(CurrentPage.Todolists)
+    liba.useObservable<EnumCurrentPage>({value: CurrentPage.Todolists})
 
     console.log('App mount');
 
@@ -23,9 +23,7 @@ export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
 AppComponent.render = ({element, statesWithWrappers, liba}: RenderParams) => {
     const FIRST_STATE_INDEX = 0
 
-    const [currentPage, setCurrentPage] = statesWithWrappers[FIRST_STATE_INDEX] as [
-        EnumCurrentPage, Dispatch<SetStateAction<EnumCurrentPage>>
-    ]
+    const currentPageState = statesWithWrappers[FIRST_STATE_INDEX] as LocalState<EnumCurrentPage>
 
     const pageSelector = document.createElement('select');
     const counterPageOption = document.createElement('option');
@@ -39,16 +37,16 @@ AppComponent.render = ({element, statesWithWrappers, liba}: RenderParams) => {
 
     const onChangeCurrentPage = (e: Event) => {
         const selectHTMLElement = e.currentTarget as HTMLSelectElement;
-        setCurrentPage(selectHTMLElement.value as EnumCurrentPage)
+        currentPageState.value = selectHTMLElement.value as EnumCurrentPage
     };
 
     pageSelector.addEventListener('change', onChangeCurrentPage);
-    pageSelector.value = currentPage;
+    pageSelector.value = currentPageState.value;
     element.append(pageSelector);
 
     console.log('App re-render');
 
-    switch (currentPage) {
+    switch (currentPageState.value) {
         case CurrentPage.Counter: {
             const counterInstance = liba.create(CounterComponent);
             element.append(counterInstance.element);

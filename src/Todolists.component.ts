@@ -1,17 +1,17 @@
-import {ComponentLibaParam, Dispatch, RenderParams, SetStateAction} from "types";
 import {createTodolist, deleteTodolist, getTodolists, TodolistEntity} from "./api/todolists";
+import {ComponentLibaParam, LocalState, RenderParams} from "./types";
 import {TodolistComponent} from "./Todolist.component";
 
 export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    const [, setTodolists] = liba.useState<TodolistEntity[]>([])
-    liba.useState('')
+    const todolistsState = liba.useObservable<TodolistEntity[]>({value: []})
+    liba.useObservable({value: ''})
 
     console.log('App mount');
 
     (async function () {
         const todolists = await getTodolists()
-        setTodolists(todolists)
+        todolists.forEach(t => todolistsState.value.push(t))
     })()
 
     return {
@@ -23,33 +23,32 @@ TodolistsComponent.render = ({element, liba, statesWithWrappers}: RenderParams) 
     const FIRST_STATE_INDEX = 0
     const SECOND_STATE_INDEX = 1
 
-    const [todolists, setTodolists] = statesWithWrappers[FIRST_STATE_INDEX] as [
-        TodolistEntity[], Dispatch<SetStateAction<TodolistEntity[]>>
-    ]
-    const [todolistTitle, setTodolistTitle] = statesWithWrappers[SECOND_STATE_INDEX] as [
-        string, Dispatch<SetStateAction<string>>
-    ]
+    const todolistsState = statesWithWrappers[FIRST_STATE_INDEX] as LocalState<TodolistEntity[]>
+    const todolistTitleState = statesWithWrappers[SECOND_STATE_INDEX] as LocalState<string>
 
     const createNewTodolist = async () => {
-        if (todolistTitle.length > 0 && todolistTitle.trim()) {
-            const newTodolist = await createTodolist(todolistTitle)
-            setTodolists([newTodolist, ...todolists])
-            setTodolistTitle('')
+        if (todolistTitleState.value.length > 0 && todolistTitleState.value.trim()) {
+            const newTodolist = await createTodolist(todolistTitleState.value)
+            todolistTitleState.value = ''
+            todolistsState.value.unshift(newTodolist)
         }
     }
 
     const removeTodolist = async (id: string) => {
         await deleteTodolist(id)
-        setTodolists(todolists.filter(t => t.id !== id))
+        const deletedTodolist = todolistsState.value.find(t => t.id === id)
+        if (deletedTodolist) {
+            const deletedTodolistIndex = todolistsState.value.indexOf(deletedTodolist)
+            todolistsState.value.splice(deletedTodolistIndex, 1)
+        }
     }
 
     const input = document.createElement('input')
-    input.value = todolistTitle
+    input.value = todolistTitleState.value
 
     const onChangeHandler = (e: Event) => {
         const inputHTMLElement = e.currentTarget as HTMLInputElement
-        const newTitleValue = inputHTMLElement.value
-        setTodolistTitle(newTitleValue)
+        todolistTitleState.value = inputHTMLElement.value
     }
 
     input.addEventListener('change', onChangeHandler)
@@ -61,7 +60,7 @@ TodolistsComponent.render = ({element, liba, statesWithWrappers}: RenderParams) 
     button.addEventListener('click', createNewTodolist)
     element.append(button)
 
-    todolists.forEach(todolist => {
+    todolistsState.value.forEach(todolist => {
         const todolistInstance = liba.create(TodolistComponent, {
                 todolist,
                 removeTodolist

@@ -3,11 +3,10 @@ import {
     ComponentInstance,
     ComponentLiba,
     CreateComponentParams,
-    Dispatch,
-    LocalState, ParentInstance,
+    LocalState,
+    ParentInstance,
     RenderComponentParams,
-    RenderLiba,
-    SetStateAction
+    RenderLiba
 } from "types";
 
 export const Liba = {
@@ -17,7 +16,7 @@ export const Liba = {
             props = {},
         }: CreateComponentParams<P>) {
 
-        const statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][] = []
+        const statesWithWrappers: LocalState<any>[] = []
 
         const renderLiba: RenderLiba = {
             create<P extends object>(ComponentFunction: ComponentFn<P>, props = {}, key?: string | number) {
@@ -41,22 +40,10 @@ export const Liba = {
 
         const componentLiba: ComponentLiba = {
             refresh: renderLiba.refresh,
-            useState<S>(initialState: S | (() => S)): [S, Dispatch<SetStateAction<S>>] {
-                const state: LocalState<S> = {
-                    value: typeof initialState === 'function'
-                        ? (initialState as () => S)()
-                        : initialState
-                };
-
-                const setState: Dispatch<SetStateAction<S>> = (newState) => {
-                    state.value = typeof newState === 'function'
-                        ? (newState as (prevState: S) => S)(state.value)
-                        : newState;
-                    componentLiba.refresh();
-                };
-                statesWithWrappers.push([state, setState])
-
-                return [state.value, setState];
+            useObservable<S>(initialState: LocalState<S>): LocalState<S> {
+                const proxy = createObservableObject(initialState, componentLiba.refresh)
+                statesWithWrappers.push(proxy)
+                return proxy;
             }
         };
         const componentInstance = ComponentFunction(props as P, {liba: componentLiba})
@@ -126,20 +113,20 @@ function createChildrenComponent<P extends object>(
     return childrenInstance
 }
 
-function renderComponent<S, P extends object>(
+function renderComponent<P extends object>(
     {
         ComponentFunction,
         componentInstance,
         renderLiba,
         statesWithWrappers
-    }: RenderComponentParams<S, P>) {
+    }: RenderComponentParams<P>) {
 
     componentInstance.childrenIndex = -1
 
     ComponentFunction.render({
         element: componentInstance.element,
         props: (componentInstance.props) as P,
-        statesWithWrappers: statesWithWrappers.map(swws => [swws[0].value, swws[1]]),
+        statesWithWrappers,
         liba: renderLiba
     })
     componentInstance.childrenComponents = componentInstance.childrenComponentsOfCurrentRender
@@ -202,4 +189,50 @@ function propsTheSame(prevProps: Record<string, any>, newProps: Record<string, a
         }
     }
     return true
+}
+
+function createObservableObject<S>(dto: LocalState<S>, onSet: () => void) {
+    // @ts-ignore
+    function createProxy(target) {
+        return new Proxy(target, {
+            set(obj, prop, value) {
+                if (value && typeof value === 'object') {
+                    value = createProxy(value);
+                }
+
+                if (obj[prop] !== value) {
+                    obj[prop] = value;
+                    onSet()
+                }
+                return true;
+            },
+            get(obj, prop) {
+                if (prop in obj) {
+                    if (Array.isArray(obj[prop])) {
+                        return new Proxy(obj[prop], {
+                            set(arr, index, value) {
+                                if (value && typeof value === 'object') {
+                                    value = createProxy(value);
+                                }
+                                // @ts-ignore
+                                arr[index] = value;
+                                onSet()
+                                return true;
+                            },
+                            deleteProperty(arr, index) {
+                                // @ts-ignore
+                                delete arr[index];
+                                onSet()
+                                return true;
+                            }
+                        });
+                    }
+                    return obj[prop];
+                }
+                return undefined;
+            }
+        });
+    }
+
+    return createProxy(dto);
 }
