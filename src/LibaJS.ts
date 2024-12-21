@@ -193,7 +193,6 @@ function propsTheSame(prevProps: Record<string, any>, newProps: Record<string, a
 
 function createObservableObject<S>(dto: LocalState<S>, onChange: () => void): LocalState<S> {
     function createProxy<T extends object>(target: T): T {
-        let pendingChanges = new Map();
         let scheduled = false;
 
         function scheduleCallback() {
@@ -201,7 +200,6 @@ function createObservableObject<S>(dto: LocalState<S>, onChange: () => void): Lo
                 scheduled = true;
                 Promise.resolve().then(() => {
                     onChange();
-                    pendingChanges.clear();
                     scheduled = false;
                 });
             }
@@ -214,7 +212,6 @@ function createObservableObject<S>(dto: LocalState<S>, onChange: () => void): Lo
                 }
 
                 if (obj[prop as keyof T] !== value) {
-                    pendingChanges.set(prop, value);
                     obj[prop as keyof T] = value;
                     scheduleCallback();
                 }
@@ -229,13 +226,11 @@ function createObservableObject<S>(dto: LocalState<S>, onChange: () => void): Lo
                                 if (newValue && typeof newValue === 'object') {
                                     newValue = createProxy(newValue);
                                 }
-                                pendingChanges.set(prop, value);
                                 arr[index as keyof typeof arr] = newValue;
                                 scheduleCallback();
                                 return true;
                             },
                             deleteProperty(arr, index) {
-                                pendingChanges.set(prop, value);
                                 delete arr[index as keyof typeof arr];
                                 scheduleCallback();
                                 return true;
