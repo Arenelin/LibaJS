@@ -206,7 +206,7 @@ function createObservableObject<S>(dto: LocalState<S>, onChange: () => void): Lo
         }
 
         return new Proxy(target, {
-            set(obj, prop, value) {
+            set(obj, prop, value, receiver) {
                 if (value && typeof value === 'object') {
                     value = createProxy(value);
                 }
@@ -215,25 +215,23 @@ function createObservableObject<S>(dto: LocalState<S>, onChange: () => void): Lo
                     obj[prop as keyof T] = value;
                     scheduleCallback();
                 }
-                return true;
+                return Reflect.set(obj, prop, value, receiver)
             },
             get(obj, prop) {
                 if (prop in obj) {
                     const value = obj[prop as keyof T];
                     if (Array.isArray(value)) {
                         return new Proxy(value, {
-                            set(arr, index, newValue) {
+                            set(arr, index, newValue, receiver) {
                                 if (newValue && typeof newValue === 'object') {
                                     newValue = createProxy(newValue);
                                 }
-                                arr[index as keyof typeof arr] = newValue;
                                 scheduleCallback();
-                                return true;
+                                return Reflect.set(arr, index, newValue, receiver)
                             },
                             deleteProperty(arr, index) {
-                                delete arr[index as keyof typeof arr];
                                 scheduleCallback();
-                                return true;
+                                return Reflect.deleteProperty(arr, index)
                             },
                         });
                     }
