@@ -1,4 +1,4 @@
-import {ComponentLibaParam, LocalState, RenderParams} from "types";
+import {ComponentLibaParam, RenderParams} from "types";
 import {CounterComponent} from "./Counter.component";
 import {TodolistsComponent} from "./Todolists.component";
 
@@ -11,7 +11,7 @@ type EnumCurrentPage = (typeof CurrentPage)[keyof typeof CurrentPage]
 
 export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    liba.useObservable<EnumCurrentPage>({value: CurrentPage.Todolists})
+    liba.signal<EnumCurrentPage>(CurrentPage.Todolists)
 
     console.log('App mount');
 
@@ -20,10 +20,10 @@ export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
     };
 };
 
-AppComponent.render = ({element, statesWithWrappers, liba}: RenderParams) => {
-    const FIRST_STATE_INDEX = 0
+AppComponent.render = ({element, signals, liba}: RenderParams) => {
+    const FIRST_SIGNAL_INDEX = 0
 
-    const currentPageState = statesWithWrappers[FIRST_STATE_INDEX] as LocalState<EnumCurrentPage>
+    const currentPageState = signals[FIRST_SIGNAL_INDEX]
 
     const pageSelector = document.createElement('select');
     const counterPageOption = document.createElement('option');
@@ -37,16 +37,16 @@ AppComponent.render = ({element, statesWithWrappers, liba}: RenderParams) => {
 
     const onChangeCurrentPage = (e: Event) => {
         const selectHTMLElement = e.currentTarget as HTMLSelectElement;
-        currentPageState.value = selectHTMLElement.value as EnumCurrentPage
+        currentPageState.set(selectHTMLElement.value)
     };
 
     pageSelector.addEventListener('change', onChangeCurrentPage);
-    pageSelector.value = currentPageState.value;
+    pageSelector.value = currentPageState();
     element.append(pageSelector);
 
     console.log('App re-render');
 
-    switch (currentPageState.value) {
+    switch (currentPageState()) {
         case CurrentPage.Counter: {
             const counterInstance = liba.create(CounterComponent);
             element.append(counterInstance.element);

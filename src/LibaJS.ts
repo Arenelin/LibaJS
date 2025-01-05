@@ -2,12 +2,14 @@ import {
     ComponentFn,
     ComponentInstance,
     ComponentLiba,
-    CreateComponentParams,
+    CreateComponentParams, Dispatch, Effect,
     LocalState,
     ParentInstance,
     RenderComponentParams,
-    RenderLiba
+    RenderLiba, SetStateAction, SignalUpdateMethod
 } from "types";
+
+let currentEffect: Effect = null;
 
 export const Liba = {
     create<P extends object>(
@@ -16,7 +18,9 @@ export const Liba = {
             props = {},
         }: CreateComponentParams<P>) {
 
-        const statesWithWrappers: LocalState<any>[] = []
+        const proxyWithWrappers: LocalState<any>[] = []
+        const statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][] = []
+        const signals: any[] = []
 
         const renderLiba: RenderLiba = {
             create<P extends object>(ComponentFunction: ComponentFn<P>, props = {}, key?: string | number) {
@@ -33,16 +37,69 @@ export const Liba = {
                     ComponentFunction,
                     componentInstance,
                     renderLiba,
-                    statesWithWrappers
+                    statesWithWrappers,
+                    proxyWithWrappers,
+                    signals
                 })
             }
         }
 
         const componentLiba: ComponentLiba = {
             refresh: renderLiba.refresh,
+            signal<V>(initialState: V): () => V {
+                let currentValue: V = initialState;
+                const effectSubscribers = new Set<() => void>()
+
+                const signalFunction = (): V => {
+                    if (currentEffect !== null) {
+                        effectSubscribers.add(currentEffect)
+                    }
+                    return currentValue
+                }
+
+                signalFunction.set = (newValue: V) => {
+                    currentValue = newValue
+                    effectSubscribers.forEach(s => setTimeout(s, 0))
+                    componentLiba.refresh()
+                }
+
+                signalFunction.update = (fn: SignalUpdateMethod<V>) => {
+                    currentValue = fn(currentValue)
+                    effectSubscribers.forEach(s => setTimeout(s, 0))
+                    componentLiba.refresh()
+                }
+                signals.push(signalFunction)
+                return signalFunction
+            },
+            computed<V>(fn: () => V): () => V {
+                return () => fn()
+            },
+            effect: (fn: () => void) => {
+                const effectWrapper = () => {
+                    currentEffect = fn
+                    fn()
+                    currentEffect = null
+                }
+                setTimeout(effectWrapper, 0)
+            },
+            useState<T>(initialState: T | (() => T)): [T, Dispatch<SetStateAction<T>>] {
+                const state: LocalState<T> = {
+                    value: typeof initialState === 'function'
+                        ? (initialState as () => T)()
+                        : initialState
+                };
+                const setState: Dispatch<SetStateAction<T>> = (newState) => {
+                    state.value = typeof newState === 'function'
+                        ? (newState as (prevState: T) => T)(state.value)
+                        : newState;
+                    componentLiba.refresh();
+                };
+                statesWithWrappers.push([state, setState])
+                return [state.value, setState]
+            },
             useObservable<S>(initialState: LocalState<S>): LocalState<S> {
                 const proxy = createObservableObject(initialState, componentLiba.refresh)
-                statesWithWrappers.push(proxy)
+                proxyWithWrappers.push(proxy)
                 return proxy;
             }
         };
@@ -55,7 +112,9 @@ export const Liba = {
             ComponentFunction,
             componentInstance,
             renderLiba,
-            statesWithWrappers
+            statesWithWrappers,
+            proxyWithWrappers,
+            signals
         })
 
         return componentInstance
@@ -113,21 +172,25 @@ function createChildrenComponent<P extends object>(
     return childrenInstance
 }
 
-function renderComponent<P extends object>(
+function renderComponent<S, P extends object>(
     {
         ComponentFunction,
         componentInstance,
         renderLiba,
-        statesWithWrappers
-    }: RenderComponentParams<P>) {
+        statesWithWrappers,
+        proxyWithWrappers,
+        signals
+    }: RenderComponentParams<S, P>) {
 
     componentInstance.childrenIndex = -1
 
     ComponentFunction.render({
         element: componentInstance.element,
         props: (componentInstance.props) as P,
+        proxyWithWrappers,
+        liba: renderLiba,
         statesWithWrappers,
-        liba: renderLiba
+        signals
     })
     componentInstance.childrenComponents = componentInstance.childrenComponentsOfCurrentRender
     componentInstance.childrenComponentsOfCurrentRender = [[], []]
@@ -241,5 +304,6 @@ function createObservableObject<S>(dto: LocalState<S>, onChange: () => void): Lo
             },
         });
     }
+
     return createProxy(dto);
 }

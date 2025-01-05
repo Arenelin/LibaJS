@@ -19,8 +19,14 @@ export type RenderParams<P extends object = {}> = {
     element: HTMLElement
     props: P
     liba: RenderLiba
-    statesWithWrappers: LocalState<any>[]
+    statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][]
+    proxyWithWrappers: LocalState<any>[]
+    signals: any[]
 }
+
+export type SetStateAction<S> = S | ((prevState: S) => S);
+
+export type Dispatch<A> = (value: A) => void;
 
 export type LocalState<S> = {
     value: S
@@ -28,6 +34,10 @@ export type LocalState<S> = {
 
 export type ComponentLiba = {
     refresh: () => void
+    signal: <V>(initialState: V) => () => V
+    computed: <V>(fn: () => V) => () => V
+    effect: (fn: () => void) => void
+    useState: <T>(initialState: T | (() => T)) => [T, Dispatch<SetStateAction<T>>]
     useObservable: <S>(initialState: LocalState<S>) => LocalState<S>
 }
 
@@ -50,9 +60,15 @@ export type CreateComponentParams<P extends object = {}> = {
     key?: string | number
 }
 
-export type RenderComponentParams<P extends object = {}> = {
+export type RenderComponentParams<S, P extends object = {}> = {
     ComponentFunction: ComponentFn<P>
     componentInstance: ComponentInstance<P>
     renderLiba: RenderLiba
-    statesWithWrappers: LocalState<any>[]
+    statesWithWrappers: [LocalState<S>, Dispatch<SetStateAction<S>>][]
+    proxyWithWrappers: LocalState<any>[]
+    signals: any[]
 }
+
+export type Effect = (() => void) | null
+
+export type SignalUpdateMethod<V> = ((prevState: V) => V)

@@ -34,14 +34,14 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
     };
 };
 
-TodolistComponent.render = ({element, props, liba, statesWithWrappers}: RenderParams<Props>) => {
+TodolistComponent.render = ({element, props, liba, proxyWithWrappers}: RenderParams<Props>) => {
     const FIRST_STATE_INDEX = 0
     const SECOND_STATE_INDEX = 1
     const THIRD_STATE_INDEX = 2
 
-    const tasksState = statesWithWrappers[FIRST_STATE_INDEX] as LocalState<TaskEntity[]>
-    const newTaskTitleState = statesWithWrappers[SECOND_STATE_INDEX] as LocalState<string>
-    const currentFilterState = statesWithWrappers[THIRD_STATE_INDEX] as LocalState<EnumTaskFilter>
+    const tasksState = proxyWithWrappers[FIRST_STATE_INDEX] as LocalState<TaskEntity[]>
+    const newTaskTitleState = proxyWithWrappers[SECOND_STATE_INDEX] as LocalState<string>
+    const currentFilterState = proxyWithWrappers[THIRD_STATE_INDEX] as LocalState<EnumTaskFilter>
 
 
     const createNewTask = async () => {

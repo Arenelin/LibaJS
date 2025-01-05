@@ -19,12 +19,12 @@ export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
     };
 };
 
-TodolistsComponent.render = ({element, liba, statesWithWrappers}: RenderParams) => {
+TodolistsComponent.render = ({element, liba, proxyWithWrappers}: RenderParams) => {
     const FIRST_STATE_INDEX = 0
     const SECOND_STATE_INDEX = 1
 
-    const todolistsState = statesWithWrappers[FIRST_STATE_INDEX] as LocalState<TodolistEntity[]>
-    const todolistTitleState = statesWithWrappers[SECOND_STATE_INDEX] as LocalState<string>
+    const todolistsState = proxyWithWrappers[FIRST_STATE_INDEX] as LocalState<TodolistEntity[]>
+    const todolistTitleState = proxyWithWrappers[SECOND_STATE_INDEX] as LocalState<string>
 
     const createNewTodolist = async () => {
         if (todolistTitleState.value.length > 0 && todolistTitleState.value.trim()) {

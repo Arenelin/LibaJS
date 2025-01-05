@@ -17,10 +17,10 @@ export const CounterComponent = ({}, {liba}: ComponentLibaParam) => {
     };
 }
 
-CounterComponent.render = ({element, statesWithWrappers}: RenderParams) => {
+CounterComponent.render = ({element, proxyWithWrappers}: RenderParams) => {
     const FIRST_STATE_INDEX = 0
 
-    const counterState= statesWithWrappers[FIRST_STATE_INDEX] as LocalState<number>
+    const counterState= proxyWithWrappers[FIRST_STATE_INDEX] as LocalState<number>
     element.append(counterState.value.toString());
     console.log('Counter re-render');
 };
