@@ -21,7 +21,7 @@ export type RenderParams<P extends object = {}> = {
     liba: RenderLiba
     statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][]
     proxyWithWrappers: LocalState<any>[]
-    signals: any[]
+    signals: WritableSignal<any>[]
 }
 
 export type SetStateAction<S> = S | ((prevState: S) => S);
@@ -34,7 +34,7 @@ export type LocalState<S> = {
 
 export type ComponentLiba = {
     refresh: () => void
-    signal: <V>(initialState: V) => () => V
+    signal: <V>(initialState: V) => WritableSignal<V>
     computed: <V>(fn: () => V) => () => V
     effect: (fn: () => void) => void
     useState: <T>(initialState: T | (() => T)) => [T, Dispatch<SetStateAction<T>>]
@@ -66,9 +66,14 @@ export type RenderComponentParams<S, P extends object = {}> = {
     renderLiba: RenderLiba
     statesWithWrappers: [LocalState<S>, Dispatch<SetStateAction<S>>][]
     proxyWithWrappers: LocalState<any>[]
-    signals: any[]
+    signals: WritableSignal<any>[]
 }
 
 export type Effect = (() => void) | null
 
 export type SignalUpdateMethod<V> = ((prevState: V) => V)
+
+export type WritableSignal<V> = (() => V) & {
+    set: (newValue: V) => void
+    update: (fn: SignalUpdateMethod<V>) => void
+}

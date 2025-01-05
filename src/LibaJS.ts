@@ -6,7 +6,7 @@ import {
     LocalState,
     ParentInstance,
     RenderComponentParams,
-    RenderLiba, SetStateAction, SignalUpdateMethod
+    RenderLiba, SetStateAction, WritableSignal, SignalUpdateMethod
 } from "types";
 
 let currentEffect: Effect = null;
@@ -20,7 +20,7 @@ export const Liba = {
 
         const proxyWithWrappers: LocalState<any>[] = []
         const statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][] = []
-        const signals: any[] = []
+        const signals: WritableSignal<any>[] = []
 
         const renderLiba: RenderLiba = {
             create<P extends object>(ComponentFunction: ComponentFn<P>, props = {}, key?: string | number) {
@@ -46,7 +46,7 @@ export const Liba = {
 
         const componentLiba: ComponentLiba = {
             refresh: renderLiba.refresh,
-            signal<V>(initialState: V): () => V {
+            signal<V>(initialState: V): WritableSignal<V> {
                 let currentValue: V = initialState;
                 const effectSubscribers = new Set<() => void>()
 
