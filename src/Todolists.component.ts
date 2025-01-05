@@ -1,54 +1,60 @@
 import {createTodolist, deleteTodolist, getTodolists, TodolistEntity} from "./api/todolists";
-import {ComponentLibaParam, LocalState, RenderParams} from "./types";
+import {ComponentLibaParam, RenderParams, WritableSignal} from "./types";
 import {TodolistComponent} from "./Todolist.component";
 
 export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    const todolistsState = liba.useObservable<TodolistEntity[]>({value: []})
-    liba.useObservable({value: ''})
+    const todolists = liba.signal<TodolistEntity[]>([])
+    liba.signal('')
 
     console.log('App mount');
 
-    (async function () {
-        const todolists = await getTodolists()
-        todolists.forEach(t => todolistsState.value.push(t))
-    })()
+    liba.effect(() => {
+        getTodolists().then(r => r.forEach(t =>
+            todolists.update(prevState => [...prevState, t])))
+    })
 
     return {
         element
     };
 };
 
-TodolistsComponent.render = ({element, liba, proxyWithWrappers}: RenderParams) => {
-    const FIRST_STATE_INDEX = 0
-    const SECOND_STATE_INDEX = 1
+TodolistsComponent.render = ({element, liba, signals}: RenderParams) => {
+    const FIRST_SIGNAL_INDEX = 0
+    const SECOND_SIGNAL_INDEX = 1
 
-    const todolistsState = proxyWithWrappers[FIRST_STATE_INDEX] as LocalState<TodolistEntity[]>
-    const todolistTitleState = proxyWithWrappers[SECOND_STATE_INDEX] as LocalState<string>
+    const todolists = signals[FIRST_SIGNAL_INDEX] as WritableSignal<TodolistEntity[]>
+    const todolistTitle = signals[SECOND_SIGNAL_INDEX] as WritableSignal<string>
 
     const createNewTodolist = async () => {
-        if (todolistTitleState.value.length > 0 && todolistTitleState.value.trim()) {
-            const newTodolist = await createTodolist(todolistTitleState.value)
-            todolistTitleState.value = ''
-            todolistsState.value.unshift(newTodolist)
+        if (todolistTitle().length > 0 && todolistTitle().trim()) {
+            const newTodolist = await createTodolist(todolistTitle())
+            todolistTitle.set('')
+            todolists.update(prevState => {
+                prevState.unshift(newTodolist)
+                return prevState
+            })
         }
     }
 
     const removeTodolist = async (id: string) => {
         await deleteTodolist(id)
-        const deletedTodolist = todolistsState.value.find(t => t.id === id)
+        const deletedTodolist = todolists().find(t => t.id === id)
         if (deletedTodolist) {
-            const deletedTodolistIndex = todolistsState.value.indexOf(deletedTodolist)
-            todolistsState.value.splice(deletedTodolistIndex, 1)
+            const deletedTodolistIndex = todolists().indexOf(deletedTodolist)
+            todolists.update(prevState => {
+                prevState.splice(deletedTodolistIndex, 1)
+                return prevState
+            })
         }
     }
 
     const input = document.createElement('input')
-    input.value = todolistTitleState.value
+    input.value = todolistTitle()
 
     const onChangeHandler = (e: Event) => {
         const inputHTMLElement = e.currentTarget as HTMLInputElement
-        todolistTitleState.value = inputHTMLElement.value
+        todolistTitle.set(inputHTMLElement.value)
     }
 
     input.addEventListener('change', onChangeHandler)
@@ -60,7 +66,7 @@ TodolistsComponent.render = ({element, liba, proxyWithWrappers}: RenderParams) =
     button.addEventListener('click', createNewTodolist)
     element.append(button)
 
-    todolistsState.value.forEach(todolist => {
+    todolists().forEach(todolist => {
         const todolistInstance = liba.create(TodolistComponent, {
                 todolist,
                 removeTodolist

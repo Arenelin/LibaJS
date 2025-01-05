@@ -1,4 +1,4 @@
-import {ComponentLibaParam, RenderParams} from "types";
+import {ComponentLibaParam, RenderParams, WritableSignal} from "types";
 import {CounterComponent} from "./Counter.component";
 import {TodolistsComponent} from "./Todolists.component";
 
@@ -23,7 +23,7 @@ export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
 AppComponent.render = ({element, signals, liba}: RenderParams) => {
     const FIRST_SIGNAL_INDEX = 0
 
-    const currentPageState = signals[FIRST_SIGNAL_INDEX]
+    const currentPageState = signals[FIRST_SIGNAL_INDEX] as WritableSignal<EnumCurrentPage>
 
     const pageSelector = document.createElement('select');
     const counterPageOption = document.createElement('option');
@@ -37,7 +37,7 @@ AppComponent.render = ({element, signals, liba}: RenderParams) => {
 
     const onChangeCurrentPage = (e: Event) => {
         const selectHTMLElement = e.currentTarget as HTMLSelectElement;
-        currentPageState.set(selectHTMLElement.value)
+        currentPageState.set(selectHTMLElement.value as EnumCurrentPage)
     };
 
     pageSelector.addEventListener('change', onChangeCurrentPage);

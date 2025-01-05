@@ -1,12 +1,12 @@
-import {ComponentLibaParam, LocalState, RenderParams} from "types";
+import {ComponentLibaParam, RenderParams, WritableSignal} from "types";
 
 export const CounterComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    const counterState = liba.useObservable({value: 0})
+    const counter = liba.signal(0)
 
     console.log('Counter mount');
     const intervalId = setInterval(() => {
-        counterState.value++
+        counter.update(prevState => prevState + 1)
     }, 1000);
 
     return {
@@ -17,10 +17,10 @@ export const CounterComponent = ({}, {liba}: ComponentLibaParam) => {
     };
 }
 
-CounterComponent.render = ({element, proxyWithWrappers}: RenderParams) => {
-    const FIRST_STATE_INDEX = 0
+CounterComponent.render = ({element, signals}: RenderParams) => {
+    const FIRST_SIGNAL_INDEX = 0
 
-    const counterState= proxyWithWrappers[FIRST_STATE_INDEX] as LocalState<number>
-    element.append(counterState.value.toString());
+    const counterState = signals[FIRST_SIGNAL_INDEX] as WritableSignal<number>
+    element.append(counterState().toString());
     console.log('Counter re-render');
 };

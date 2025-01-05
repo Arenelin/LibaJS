@@ -1,6 +1,6 @@
 import {TodolistEntity} from "./api/todolists";
 import {createTask, deleteTask, getTasks, TaskEntity, TaskStatuses, updateTask, UpdateTaskModel} from "./api/tasks";
-import {ComponentLibaParam, LocalState, RenderParams} from "./types";
+import {ComponentLibaParam, RenderParams, WritableSignal} from "./types";
 import {TaskComponent} from "./Task.component";
 
 const TaskFilter = {
@@ -18,61 +18,69 @@ type Props = {
 
 export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    const tasksState = liba.useObservable<TaskEntity[]>({value: []})
-    liba.useObservable({value: ''})
-    liba.useObservable<EnumTaskFilter>({value: TaskFilter.All})
+    const tasks = liba.signal<TaskEntity[]>( [])
+    liba.signal('')
+    liba.signal<EnumTaskFilter>(TaskFilter.All)
 
     console.log('Todolist mount');
 
-    (async function () {
-        const tasks = await getTasks(props.todolist.id)
-        tasks.forEach(t => tasksState.value.push(t))
-    })()
+    liba.effect(() => {
+        getTasks(props.todolist.id).then(r => r.forEach(t =>
+            tasks.update(prevState => [...prevState, t])))
+    })
 
     return {
         element
     };
 };
 
-TodolistComponent.render = ({element, props, liba, proxyWithWrappers}: RenderParams<Props>) => {
-    const FIRST_STATE_INDEX = 0
-    const SECOND_STATE_INDEX = 1
-    const THIRD_STATE_INDEX = 2
+TodolistComponent.render = ({element, props, liba, signals}: RenderParams<Props>) => {
+    const FIRST_SIGNAL_INDEX = 0
+    const SECOND_SIGNAL_INDEX = 1
+    const THIRD_SIGNAL_INDEX = 2
 
-    const tasksState = proxyWithWrappers[FIRST_STATE_INDEX] as LocalState<TaskEntity[]>
-    const newTaskTitleState = proxyWithWrappers[SECOND_STATE_INDEX] as LocalState<string>
-    const currentFilterState = proxyWithWrappers[THIRD_STATE_INDEX] as LocalState<EnumTaskFilter>
-
+    const tasks = signals[FIRST_SIGNAL_INDEX] as WritableSignal<TaskEntity[]>
+    const newTaskTitle = signals[SECOND_SIGNAL_INDEX] as WritableSignal<string>
+    const currentFilter = signals[THIRD_SIGNAL_INDEX] as WritableSignal<EnumTaskFilter>
 
     const createNewTask = async () => {
-        if (newTaskTitleState.value.length > 0 && newTaskTitleState.value.trim()) {
-            const newTask = await createTask({todolistId: props.todolist.id, title: newTaskTitleState.value})
-            newTaskTitleState.value = ''
-            tasksState.value.unshift(newTask)
+        if (newTaskTitle().length > 0 && newTaskTitle().trim()) {
+            const newTask = await createTask({todolistId: props.todolist.id, title: newTaskTitle()})
+            newTaskTitle.set('')
+            tasks.update(prevState => {
+                prevState.unshift(newTask)
+                return prevState
+            })
         }
     }
 
     const updateTaskHandler = async (taskId: string, model: UpdateTaskModel) => {
         await updateTask({todolistId: props.todolist.id, taskId, model})
-        const prevTask = tasksState.value.find(t => t.id === taskId)
+        const prevTask = tasks().find(t => t.id === taskId)
         if (prevTask) {
-            const prevTaskIndex = tasksState.value.indexOf(prevTask)
+            const prevTaskIndex = tasks().indexOf(prevTask)
             const updatedTask = {...prevTask, ...model}
-            tasksState.value.splice(prevTaskIndex, 1, updatedTask)
+            tasks.update(prevState => {
+                prevState.splice(prevTaskIndex, 1, updatedTask)
+                return prevState
+            })
         }
     }
 
     const removeTask = async (taskId: string) => {
         await deleteTask({todolistId: props.todolist.id, taskId})
-        const deletedTask = tasksState.value.find(t => t.id === taskId)
+        const deletedTask = tasks().find(t => t.id === taskId)
         if (deletedTask) {
-            const deletedTaskIndex = tasksState.value.indexOf(deletedTask)
-            tasksState.value.splice(deletedTaskIndex, 1)
+            const deletedTaskIndex = tasks().indexOf(deletedTask)
+            tasks.update(prevState => {
+                prevState.splice(deletedTaskIndex, 1)
+                return prevState
+            })
         }
     }
 
     const filterTasks = (filterValue: EnumTaskFilter) => {
-        currentFilterState.value = filterValue
+        currentFilter.set(filterValue)
     }
 
     const title = document.createElement('h2');
@@ -100,11 +108,11 @@ TodolistComponent.render = ({element, props, liba, proxyWithWrappers}: RenderPar
     element.append(removeButton)
 
     const input = document.createElement('input')
-    input.value = newTaskTitleState.value
+    input.value = newTaskTitle()
 
     const onChangeHandler = (e: Event) => {
         const inputHTMLElement = e.currentTarget as HTMLInputElement
-        newTaskTitleState.value = inputHTMLElement.value
+        newTaskTitle.set(inputHTMLElement.value)
     }
 
     input.addEventListener('change', onChangeHandler)
@@ -118,11 +126,11 @@ TodolistComponent.render = ({element, props, liba, proxyWithWrappers}: RenderPar
 
     console.log('Todolist re-render');
 
-    const filteredTasks = currentFilterState.value !== TaskFilter.All
-        ? tasksState.value.filter((t: TaskEntity) => currentFilterState.value === TaskFilter.Active
+    const filteredTasks = currentFilter() !== TaskFilter.All
+        ? tasks().filter((t: TaskEntity) => currentFilter() === TaskFilter.Active
             ? t.status === TaskStatuses.New
             : t.status === TaskStatuses.Completed)
-        : tasksState.value
+        : tasks()
 
     filteredTasks.forEach((task: TaskEntity) => {
         const taskInstance = liba.create(TaskComponent, {
