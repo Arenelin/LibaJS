@@ -1,15 +1,25 @@
-import {TodolistEntity} from "./api/todolists";
-import {createTask, deleteTask, getTasks, TaskEntity, TaskStatuses, updateTask, UpdateTaskModel} from "./api/tasks";
+import {
+    createTask,
+    deleteTask,
+    getTasks,
+    TaskEntity,
+    TaskStatuses,
+    TodolistEntity,
+    updateTask,
+    UpdateTaskModel
+} from "./api";
 import {ComponentLibaParam, RenderParams, WritableSignal} from "./types";
 import {TaskComponent} from "./Task.component";
+import {FilterComponent} from "./Filter.component";
+import {AddItemFormComponent, Item} from "./AddItemForm.component";
 
-const TaskFilter = {
+export const TaskFilter = {
     All: 'all',
     Active: 'active',
     Completed: 'completed',
 } as const
 
-type EnumTaskFilter = (typeof TaskFilter)[keyof typeof TaskFilter]
+export type EnumTaskFilter = (typeof TaskFilter)[keyof typeof TaskFilter]
 
 type Props = {
     todolist: TodolistEntity
@@ -19,7 +29,6 @@ type Props = {
 export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
     const tasks = liba.signal<TaskEntity[]>( [])
-    liba.signal('')
     liba.signal<EnumTaskFilter>(TaskFilter.All)
 
     console.log('Todolist mount');
@@ -36,22 +45,17 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
 
 TodolistComponent.render = ({element, props, liba, signals}: RenderParams<Props>) => {
     const FIRST_SIGNAL_INDEX = 0
-    const SECOND_SIGNAL_INDEX = 1
-    const THIRD_SIGNAL_INDEX = 2
+    const THIRD_SIGNAL_INDEX = 1
 
     const tasks = signals[FIRST_SIGNAL_INDEX] as WritableSignal<TaskEntity[]>
-    const newTaskTitle = signals[SECOND_SIGNAL_INDEX] as WritableSignal<string>
     const currentFilter = signals[THIRD_SIGNAL_INDEX] as WritableSignal<EnumTaskFilter>
 
-    const createNewTask = async () => {
-        if (newTaskTitle().length > 0 && newTaskTitle().trim()) {
-            const newTask = await createTask({todolistId: props.todolist.id, title: newTaskTitle()})
-            newTaskTitle.set('')
+    const createNewTask = async (newTaskTitle: string) => {
+            const newTask = await createTask({todolistId: props.todolist.id, title: newTaskTitle})
             tasks.update(prevState => {
                 prevState.unshift(newTask)
                 return prevState
             })
-        }
     }
 
     const updateTaskHandler = async (taskId: string, model: UpdateTaskModel) => {
@@ -87,42 +91,16 @@ TodolistComponent.render = ({element, props, liba, signals}: RenderParams<Props>
     title.append(props.todolist.title);
     element.append(title);
 
-    const allButton = document.createElement('button')
-    allButton.append('Show all tasks')
-    allButton.addEventListener('click', () => filterTasks(TaskFilter.All))
-    element.append(allButton)
-
-    const activeButton = document.createElement('button')
-    activeButton.append('Show only active tasks')
-    activeButton.addEventListener('click', () => filterTasks(TaskFilter.Active))
-    element.append(activeButton)
-
-    const completedButton = document.createElement('button')
-    completedButton.append('Show only completed tasks')
-    completedButton.addEventListener('click', () => filterTasks(TaskFilter.Completed))
-    element.append(completedButton)
+    const filterButtons = liba.create(FilterComponent, {filterTasks})
+    element.append(filterButtons.element)
 
     const removeButton = document.createElement('button')
     removeButton.append('Remove todolist')
     removeButton.addEventListener('click', () => props.removeTodolist(props.todolist.id))
     element.append(removeButton)
 
-    const input = document.createElement('input')
-    input.value = newTaskTitle()
-
-    const onChangeHandler = (e: Event) => {
-        const inputHTMLElement = e.currentTarget as HTMLInputElement
-        newTaskTitle.set(inputHTMLElement.value)
-    }
-
-    input.addEventListener('change', onChangeHandler)
-    element.append(input)
-
-    const button = document.createElement('button')
-    button.append('Create new task')
-
-    button.addEventListener('click', createNewTask)
-    element.append(button)
+    const addTaskForm = liba.create(AddItemFormComponent, {createNewItem: createNewTask, item: Item.Task})
+    element.append(addTaskForm.element)
 
     console.log('Todolist re-render');
 

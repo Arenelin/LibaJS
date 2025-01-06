@@ -1,6 +1,7 @@
-import {createTodolist, deleteTodolist, getTodolists, TodolistEntity} from "./api/todolists";
 import {ComponentLibaParam, RenderParams, WritableSignal} from "./types";
 import {TodolistComponent} from "./Todolist.component";
+import {AddItemFormComponent, Item} from "./AddItemForm.component.ts";
+import {createTodolist, deleteTodolist, getTodolists, TodolistEntity} from "./api";
 
 export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
@@ -21,20 +22,15 @@ export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
 
 TodolistsComponent.render = ({element, liba, signals}: RenderParams) => {
     const FIRST_SIGNAL_INDEX = 0
-    const SECOND_SIGNAL_INDEX = 1
 
     const todolists = signals[FIRST_SIGNAL_INDEX] as WritableSignal<TodolistEntity[]>
-    const todolistTitle = signals[SECOND_SIGNAL_INDEX] as WritableSignal<string>
 
-    const createNewTodolist = async () => {
-        if (todolistTitle().length > 0 && todolistTitle().trim()) {
-            const newTodolist = await createTodolist(todolistTitle())
-            todolistTitle.set('')
-            todolists.update(prevState => {
-                prevState.unshift(newTodolist)
-                return prevState
-            })
-        }
+    const createNewTodolist = async (todolistTitle: string) => {
+        const newTodolist = await createTodolist(todolistTitle)
+        todolists.update(prevState => {
+            prevState.unshift(newTodolist)
+            return prevState
+        })
     }
 
     const removeTodolist = async (id: string) => {
@@ -49,22 +45,8 @@ TodolistsComponent.render = ({element, liba, signals}: RenderParams) => {
         }
     }
 
-    const input = document.createElement('input')
-    input.value = todolistTitle()
-
-    const onChangeHandler = (e: Event) => {
-        const inputHTMLElement = e.currentTarget as HTMLInputElement
-        todolistTitle.set(inputHTMLElement.value)
-    }
-
-    input.addEventListener('change', onChangeHandler)
-    element.append(input)
-
-    const button = document.createElement('button')
-    button.append('Create new todolist')
-
-    button.addEventListener('click', createNewTodolist)
-    element.append(button)
+    const addTodoForm = liba.create(AddItemFormComponent, {createNewItem: createNewTodolist, item: Item.Todolist})
+    element.append(addTodoForm.element)
 
     todolists().forEach(todolist => {
         const todolistInstance = liba.create(TodolistComponent, {
