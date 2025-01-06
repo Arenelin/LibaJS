@@ -7,7 +7,7 @@ import {
     ParentInstance,
     RenderComponentParams,
     RenderLiba, SetStateAction, WritableSignal, SignalUpdateMethod
-} from "types";
+} from "./types";
 
 let currentEffect: Effect = null;
 
