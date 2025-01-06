@@ -1,22 +1,19 @@
 {
+  "name": "vite-version",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "http-server -p 3000",
-    "build": "tsc && node fix-imports.js"
-  },
-  "dependencies": {
-    "http-server": "^14.1.1",
-    "@babel/preset-env": "^7.25.3",
-    "babel-jest": "^29.7.0",
-    "tslib": "^2.8.1",
-    "typescript": "^5.6.3"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "@types/jest": "^29.5.14"
+    "@types/node": "^22.10.5",
+    "typescript": "~5.6.3",
+    "vite": "^6.0.7"
   },
-  "jest": {
-    "transform": {
-      "^.+\\.[tj]sx?$": "babel-jest"
-    }
+  "engines": {
+    "node": ">=22.11.0"
   }
 }
