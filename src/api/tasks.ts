@@ -1,5 +1,6 @@
 import {fetchInstance, ServerResponse} from "./interceptor";
 import {ApiEndpoint} from "../constants";
+import {EnumTaskPriorities, EnumTaskStatuses} from "../enums";
 
 export const getTasks = async (todolistId: string): Promise<TaskEntity[]> => {
     const response: GetTasksResponse = await fetchInstance(`/todo-lists/${todolistId}/tasks`)
@@ -57,21 +58,6 @@ export type UpdateTaskModel = {
     deadline: string
 }
 
-export const TaskStatuses = {
-    New: 0,
-    InProgress: 1,
-    Completed: 2,
-    Draft: 3,
-} as const
-
-export const TaskPriorities = {
-    Low: 0,
-    Middle: 1,
-    High: 2,
-    Urgently: 3,
-    Later: 4,
-} as const
-
 export type TaskEntity = {
     description: string
     title: string
@@ -85,6 +71,3 @@ export type TaskEntity = {
     order: number
     addedDate: string
 };
-
-export type EnumTaskStatuses = (typeof TaskStatuses)[keyof typeof TaskStatuses]
-export type EnumTaskPriorities = (typeof TaskPriorities)[keyof typeof TaskPriorities]

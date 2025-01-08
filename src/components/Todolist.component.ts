@@ -3,23 +3,15 @@ import {
     deleteTask,
     getTasks,
     TaskEntity,
-    TaskStatuses,
     TodolistEntity,
     updateTask,
     UpdateTaskModel
-} from "./api";
-import {ComponentLibaParam, RenderParams, WritableSignal} from "./types";
-import {TaskComponent} from "./Task.component";
-import {FilterComponent} from "./Filter.component";
-import {AddItemFormComponent, Item} from "./AddItemForm.component";
-
-export const TaskFilter = {
-    All: 'all',
-    Active: 'active',
-    Completed: 'completed',
-} as const
-
-export type EnumTaskFilter = (typeof TaskFilter)[keyof typeof TaskFilter]
+} from "../api";
+import {ComponentLibaParam, RenderParams, WritableSignal} from "../types";
+import {EnumTaskFilter, Item, TaskFilter, TaskStatuses} from "../enums";
+import {AddItemFormComponent} from "./AddItemForm.component.ts";
+import {FilterComponent} from "./Filter.component.ts";
+import {TaskComponent} from "./Task.component.ts";
 
 type Props = {
     todolist: TodolistEntity

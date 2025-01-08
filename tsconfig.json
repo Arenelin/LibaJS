@@ -7,7 +7,6 @@
 
     // Modules options
     "module": "esnext",
-    "rootDir": "src",
     "outDir": "dist",
     "moduleResolution": "bundler",
     "baseUrl": "./src",

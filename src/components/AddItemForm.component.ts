@@ -1,16 +1,10 @@
 import {ComponentLibaParam, RenderParams, WritableSignal} from "types";
+import {EnumItem} from "../enums";
 
 type Props = {
     createNewItem: (itemTitle: string) => void
     item: EnumItem
 }
-
-export const Item = {
-    Todolist: 'todolist',
-    Task: 'task'
-} as const
-
-type EnumItem = (typeof Item)[keyof typeof Item]
 
 export const AddItemFormComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');

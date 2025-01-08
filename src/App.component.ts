@@ -1,13 +1,6 @@
 import {ComponentLibaParam, RenderParams, WritableSignal} from "types";
-import {CounterComponent} from "./Counter.component";
-import {TodolistsComponent} from "./Todolists.component";
-
-const CurrentPage = {
-    Todolists: 'todolists',
-    Counter: 'counter'
-} as const
-
-type EnumCurrentPage = (typeof CurrentPage)[keyof typeof CurrentPage]
+import {CounterComponent, TodolistsComponent} from "./components";
+import {CurrentPage, EnumCurrentPage} from "./enums";
 
 export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');

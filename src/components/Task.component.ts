@@ -1,5 +1,6 @@
 import {ComponentLibaParam, RenderParams} from "types";
-import {EnumTaskPriorities, EnumTaskStatuses, TaskEntity, TaskStatuses, UpdateTaskModel} from "./api";
+import {EnumTaskPriorities, EnumTaskStatuses, TaskStatuses} from "../enums";
+import {TaskEntity, UpdateTaskModel} from "../api";
 
 type Props = {
     task: TaskEntity

@@ -1,13 +1,12 @@
 import {ComponentLibaParam, RenderParams} from "types";
-import {EnumTaskFilter, TaskFilter} from "./Todolist.component";
+import {EnumTaskFilter, TaskFilter} from "../enums";
 
 type Props = {
     filterTasks: (filter: EnumTaskFilter) => void
 }
 
-export const FilterComponent = ({}, {liba}: ComponentLibaParam) => {
+export const FilterComponent = ({}, {}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    liba.signal('')
 
     return {
         element
@@ -29,4 +28,5 @@ FilterComponent.render = ({element, props}: RenderParams<Props>) => {
     completedButton.append('Show only completed tasks')
     completedButton.addEventListener('click', () => props.filterTasks(TaskFilter.Completed))
     element.append(completedButton)
+    console.log('Filter re-render')
 };
