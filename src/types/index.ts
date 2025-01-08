@@ -1,3 +1,5 @@
+import {CacheManager} from "../children-cache-manager.ts";
+
 export type ComponentFn<P extends object = {}> = {
     (props: P, {liba}: ComponentLibaParam): ComponentInstance<P>
     render: (params: RenderParams<P>) => void
@@ -10,9 +12,7 @@ export type ComponentInstance<P extends object = {}> = {
     type?: ComponentFn<P>
     refresh?: () => void
     key?: string | number
-    childrenComponents?: [ComponentInstance<any>[], ComponentInstance<any>[]]
-    childrenComponentsOfCurrentRender?: [ComponentInstance<any>[], ComponentInstance<any>[]]
-    childrenIndex?: number
+    childrenComponents?: CacheManager<any>
 }
 
 export type RenderParams<P extends object = {}> = {
