@@ -18,6 +18,8 @@ export const AddItemFormComponent = ({}, {liba}: ComponentLibaParam) => {
 AddItemFormComponent.render = ({element, signals, props}: RenderParams<Props>) => {
     const FIRST_SIGNAL_INDEX = 0
 
+    console.log('AddItemForm re-render')
+
     const itemTitle = signals[FIRST_SIGNAL_INDEX] as WritableSignal<string>
 
     const titleInput = document.createElement('input')
