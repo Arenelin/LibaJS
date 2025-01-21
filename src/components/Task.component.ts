@@ -22,21 +22,8 @@ export const TaskComponent = ({}, {liba}: ComponentLibaParam) => {
     }
 }
 
-TaskComponent.render = ({element, props}: RenderParams<Props>) => {
+TaskComponent.render = ({element, props, liba}: RenderParams<Props>) => {
     element.append(props.task.title)
-    const checkbox = document.createElement('input')
-    checkbox.type = 'checkbox'
-    checkbox.checked = props.task.status === TaskStatuses.Completed
-
-    const createTaskModel = (task: TaskEntity, objectChange: UpdatedTaskFields) => ({
-        title: task.title,
-        status: task.status,
-        deadline: task.deadline,
-        description: task.description,
-        startDate: task.startDate,
-        priority: task.priority,
-        ...objectChange,
-    })
 
     const onChangeStatus = (e: Event) => {
         const checkboxHTMLElement = e.currentTarget as HTMLInputElement
@@ -48,12 +35,28 @@ TaskComponent.render = ({element, props}: RenderParams<Props>) => {
         }))
     }
 
-    checkbox.addEventListener('change', onChangeStatus)
+    const checkbox = liba.create('input', {
+        type: 'checkbox',
+        checked: props.task.status === TaskStatuses.Completed,
+        onChange: onChangeStatus
+    })
+
+    const createTaskModel = (task: TaskEntity, objectChange: UpdatedTaskFields) => ({
+        title: task.title,
+        status: task.status,
+        deadline: task.deadline,
+        description: task.description,
+        startDate: task.startDate,
+        priority: task.priority,
+        ...objectChange,
+    })
+
     element.append(checkbox)
 
-    const removeButton = document.createElement('button')
-    removeButton.append('X')
-    removeButton.addEventListener('click', () => props.removeTask(props.task.id))
+    const removeButton = liba.create('button', {
+        children: ['X'],
+        onClick: () => props.removeTask(props.task.id)
+    })
     element.append(removeButton)
 
     console.log('Task re-render')

@@ -3,14 +3,15 @@ import {
     ComponentLiba,
     CreateComponentParams, Dispatch, Effect,
     LocalState,
-    RenderLiba, SetStateAction, WritableSignal, SignalUpdateMethod
+    RenderLiba, SetStateAction, WritableSignal, SignalUpdateMethod, HTMLTag
 } from "./types";
 import {
     createObservableObject,
     cleanComponent,
     ensureChildren,
     renderComponent,
-    createChildrenComponent
+    createChildrenComponent,
+    createHtmlElement
 } from "./utils";
 
 let currentEffect: Effect = null;
@@ -29,13 +30,17 @@ export const Liba = {
         const signals: WritableSignal<any>[] = []
 
         const renderLiba: RenderLiba = {
-            create<P extends object>(ComponentFunction: ComponentFn<P>, props = {}, key?: string | number) {
-                return createChildrenComponent({
-                    ComponentFunction,
-                    props,
-                    parentInstance: componentInstance,
-                    key
-                })
+            create<P extends object, TagName extends HTMLTag>(ChildrenElement: ComponentFn<P> | TagName, props = {}, key?: string | number) {
+                if (typeof ChildrenElement === 'function') {
+                    return createChildrenComponent({
+                        ComponentFunction: ChildrenElement,
+                        props,
+                        parentInstance: componentInstance,
+                        key
+                    })
+                } else {
+                    return createHtmlElement(ChildrenElement, props)
+                }
             },
             refresh() {
                 cleanComponent(componentInstance)

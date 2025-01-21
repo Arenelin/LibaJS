@@ -46,8 +46,18 @@ export type ComponentLibaParam = {
 }
 
 export type RenderLiba = {
-    create: <P extends object = {}>(ChildrenComponentFunction: ComponentFn<P>, props?: P, key?: string | number)
-        => ComponentInstance<P>
+    create<P extends object>(
+        ComponentFunction: ComponentFn<P>,
+        props?: P,
+        key?: string | number
+    ): ComponentInstance<P>
+
+    create<TagName extends HTMLTag>(
+        tagName: TagName,
+        props?: CreateHTMLElementProps,
+        key?: string | number
+    ): HTMLElementTagNameMap[TagName]
+
     refresh: () => void
 }
 
@@ -77,3 +87,9 @@ export type WritableSignal<V> = (() => V) & {
     set: (newValue: V) => void
     update: (fn: SignalUpdateMethod<V>) => void
 }
+
+export type HTMLTag = keyof HTMLElementTagNameMap;
+
+export type CreateHTMLElementProps = Record<string, any> & {
+    children?: (HTMLElement | string | number)[];
+};

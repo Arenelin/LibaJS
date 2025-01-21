@@ -18,23 +18,25 @@ AppComponent.render = ({element, signals, liba}: RenderParams) => {
 
     const currentPageState = signals[FIRST_SIGNAL_INDEX] as WritableSignal<EnumCurrentPage>
 
-    const pageSelector = document.createElement('select');
-    const counterPageOption = document.createElement('option');
-    counterPageOption.value = CurrentPage.Counter;
-    counterPageOption.append('Counter page');
-
-    const todolistPageOption = document.createElement('option');
-    todolistPageOption.value = CurrentPage.Todolists;
-    todolistPageOption.append('Todolist page');
-    pageSelector.append(counterPageOption, todolistPageOption);
-
+    const counterPageOption = liba.create('option', {
+        value: CurrentPage.Counter,
+        children: ['Counter page']
+    });
+    const todolistPageOption = liba.create('option', {
+        value: CurrentPage.Todolists,
+        children: ['Todolist page']
+    });
     const onChangeCurrentPage = (e: Event) => {
         const selectHTMLElement = e.currentTarget as HTMLSelectElement;
         currentPageState.set(selectHTMLElement.value as EnumCurrentPage)
     };
 
-    pageSelector.addEventListener('change', onChangeCurrentPage);
-    pageSelector.value = currentPageState();
+    const pageSelector = liba.create('select', {
+        children: [todolistPageOption, counterPageOption],
+        onChange: onChangeCurrentPage,
+        value: currentPageState()
+    });
+
     element.append(pageSelector);
 
     console.log('App re-render');

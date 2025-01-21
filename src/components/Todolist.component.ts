@@ -20,7 +20,7 @@ type Props = {
 
 export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
     const element = document.createElement('div');
-    const tasks = liba.signal<TaskEntity[]>( [])
+    const tasks = liba.signal<TaskEntity[]>([])
     liba.signal<EnumTaskFilter>(TaskFilter.All)
 
     console.log('Todolist mount');
@@ -43,11 +43,11 @@ TodolistComponent.render = ({element, props, liba, signals}: RenderParams<Props>
     const currentFilter = signals[THIRD_SIGNAL_INDEX] as WritableSignal<EnumTaskFilter>
 
     const createNewTask = async (newTaskTitle: string) => {
-            const newTask = await createTask({todolistId: props.todolist.id, title: newTaskTitle})
-            tasks.update(prevState => {
-                prevState.unshift(newTask)
-                return prevState
-            })
+        const newTask = await createTask({todolistId: props.todolist.id, title: newTaskTitle})
+        tasks.update(prevState => {
+            prevState.unshift(newTask)
+            return prevState
+        })
     }
 
     const updateTaskHandler = async (taskId: string, model: UpdateTaskModel) => {
@@ -79,19 +79,25 @@ TodolistComponent.render = ({element, props, liba, signals}: RenderParams<Props>
         currentFilter.set(filterValue)
     }
 
-    const title = document.createElement('h2');
-    title.append(props.todolist.title);
+    const title = liba.create('h2', {
+        children: [props.todolist.title]
+    });
     element.append(title);
 
     const filterButtons = liba.create(FilterComponent, {filterTasks})
     element.append(filterButtons.element)
 
-    const removeButton = document.createElement('button')
-    removeButton.append('Remove todolist')
-    removeButton.addEventListener('click', () => props.removeTodolist(props.todolist.id))
+    const removeButton = liba.create('button', {
+        children: ['Remove todolist'],
+        onClick: () => props.removeTodolist(props.todolist.id)
+    })
+
     element.append(removeButton)
 
-    const addTaskForm = liba.create(AddItemFormComponent, {createNewItem: createNewTask, item: Item.Task})
+    const addTaskForm = liba.create(AddItemFormComponent, {
+        createNewItem: createNewTask,
+        item: Item.Task
+    })
     element.append(addTaskForm.element)
 
     console.log('Todolist re-render');

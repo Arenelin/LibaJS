@@ -13,20 +13,26 @@ export const FilterComponent = ({}, {}: ComponentLibaParam) => {
     };
 };
 
-FilterComponent.render = ({element, props}: RenderParams<Props>) => {
-    const allButton = document.createElement('button')
-    allButton.append('Show all tasks')
-    allButton.addEventListener('click', () => props.filterTasks(TaskFilter.All))
+FilterComponent.render = ({element, props, liba}: RenderParams<Props>) => {
+    const allButton = liba.create('button', {
+        children: ['Show all tasks'],
+        onClick: () => props.filterTasks(TaskFilter.All)
+    })
+
     element.append(allButton)
 
-    const activeButton = document.createElement('button')
-    activeButton.append('Show only active tasks')
-    activeButton.addEventListener('click', () => props.filterTasks(TaskFilter.Active))
+    const activeButton = liba.create('button', {
+        children: ['Show only active tasks'],
+        onClick: () => props.filterTasks(TaskFilter.Active)
+    })
+
     element.append(activeButton)
 
-    const completedButton = document.createElement('button')
-    completedButton.append('Show only completed tasks')
-    completedButton.addEventListener('click', () => props.filterTasks(TaskFilter.Completed))
+    const completedButton = liba.create('button', {
+        children: ['Show only completed tasks'],
+        onClick: () => props.filterTasks(TaskFilter.Completed)
+    })
+
     element.append(completedButton)
     console.log('Filter re-render')
 };

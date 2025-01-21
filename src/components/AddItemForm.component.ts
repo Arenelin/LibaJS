@@ -15,27 +15,24 @@ export const AddItemFormComponent = ({}, {liba}: ComponentLibaParam) => {
     };
 };
 
-AddItemFormComponent.render = ({element, signals, props}: RenderParams<Props>) => {
+AddItemFormComponent.render = ({element, signals, props, liba}: RenderParams<Props>) => {
     const FIRST_SIGNAL_INDEX = 0
 
     console.log('AddItemForm re-render')
 
     const itemTitle = signals[FIRST_SIGNAL_INDEX] as WritableSignal<string>
 
-    const titleInput = document.createElement('input')
-    titleInput.value = itemTitle()
-
     const onChangeHandler = (e: Event) => {
         const inputHTMLElement = e.currentTarget as HTMLInputElement
         itemTitle.set(inputHTMLElement.value)
     }
 
-    titleInput.addEventListener('change', onChangeHandler)
+    const titleInput = liba.create('input', {
+        onChange: onChangeHandler,
+        value: itemTitle()
+    })
 
     element.append(titleInput)
-
-    const addButton = document.createElement('button')
-    addButton.append(`Create new ${props.item}`)
 
     const createItem = () => {
         if (itemTitle().length > 0 && itemTitle().trim()) {
@@ -43,7 +40,10 @@ AddItemFormComponent.render = ({element, signals, props}: RenderParams<Props>) =
             itemTitle.set('')
         }
     }
+    const addButton = liba.create('button', {
+        children: [`Create new ${props.item}`],
+        onClick: createItem
+    })
 
-    addButton.addEventListener('click', createItem)
     element.append(addButton)
 };
