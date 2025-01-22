@@ -5,22 +5,20 @@ import {createTodolist, deleteTodolist, getTodolists, TodolistEntity} from "../a
 import {Item} from "../enums";
 
 export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
-    const element = document.createElement('div');
+    liba.createElement('div');
     const todolists = liba.signal<TodolistEntity[]>([])
 
-    console.log('App mount');
+    console.log('Todolists mount');
 
     liba.effect(() => {
         getTodolists().then(r => r.forEach(t =>
             todolists.update(prevState => [...prevState, t])))
     })
 
-    return {
-        element
-    };
+    return {};
 };
 
-TodolistsComponent.render = ({element, liba, signals}: RenderParams) => {
+TodolistsComponent.render = ({liba, signals}: RenderParams) => {
     const FIRST_SIGNAL_INDEX = 0
 
     const todolists = signals[FIRST_SIGNAL_INDEX] as WritableSignal<TodolistEntity[]>
@@ -45,18 +43,17 @@ TodolistsComponent.render = ({element, liba, signals}: RenderParams) => {
         }
     }
 
-    const addTodoForm = liba.create(AddItemFormComponent, {
+    liba.create(AddItemFormComponent, { // no element error
         createNewItem: createNewTodolist,
         item: Item.Todolist
     })
-    element.append(addTodoForm.element)
 
     todolists().forEach(todolist => {
-        const todolistInstance = liba.create(TodolistComponent, {
+        liba.create(TodolistComponent, { // no element error
                 todolist,
                 removeTodolist
             },
             todolist.id);
-        element.append(todolistInstance.element);
     });
+    console.log('Todolists re-render');
 };

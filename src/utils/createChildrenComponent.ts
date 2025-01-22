@@ -20,10 +20,17 @@ export function createChildrenComponent<P extends object>(
                 alreadyExistedComponentInstance.props = props;
                 alreadyExistedComponentInstance.refresh?.();
             }
-            return alreadyExistedComponentInstance
+            if (parentInstance) {
+                parentInstance.element.append(alreadyExistedComponentInstance.element)
+                return
+            }
         } else if (parentInstance && parentInstance.childrenComponents) {
             delete parentInstance.childrenComponents[parentInstance.childrenIndex]
         }
     }
-    return Liba.create({ComponentFunction, props, parentInstance, key})
+    const childrenInstance = Liba.create({ComponentFunction, props, parentInstance, key})
+
+    if (parentInstance) {
+        parentInstance.element.append(childrenInstance.element)
+    }
 }

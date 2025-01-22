@@ -1,6 +1,6 @@
 import {CreateHTMLElementProps, HTMLTag} from "../types";
 
-export const createHtmlElement = <T extends HTMLTag>(tagName: T, props: CreateHTMLElementProps, parentElement: any): HTMLElementTagNameMap[T] => {
+export const createHtmlElementInsideComponent = <T extends HTMLTag>(tagName: T, props: CreateHTMLElementProps): HTMLElementTagNameMap[T] => {
     const childElement = document.createElement(tagName)
 
     Object.keys(props).forEach(key => {
@@ -25,10 +25,6 @@ export const createHtmlElement = <T extends HTMLTag>(tagName: T, props: CreateHT
             childElement.setAttribute(key, props[key]);
         }
     })
-
-    if (parentElement) {
-        parentElement.element.append(childElement)
-    }
 
     return childElement
 }

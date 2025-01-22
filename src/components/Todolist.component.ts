@@ -19,7 +19,7 @@ type Props = {
 }
 
 export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
-    const element = document.createElement('div');
+    liba.createElement('div');
     const tasks = liba.signal<TaskEntity[]>([])
     liba.signal<EnumTaskFilter>(TaskFilter.All)
 
@@ -30,12 +30,10 @@ export const TodolistComponent = (props: Props, {liba}: ComponentLibaParam) => {
             tasks.update(prevState => [...prevState, t])))
     })
 
-    return {
-        element
-    };
+    return {};
 };
 
-TodolistComponent.render = ({element, props, liba, signals}: RenderParams<Props>) => {
+TodolistComponent.render = ({props, liba, signals}: RenderParams<Props>) => {
     const FIRST_SIGNAL_INDEX = 0
     const THIRD_SIGNAL_INDEX = 1
 
@@ -79,26 +77,23 @@ TodolistComponent.render = ({element, props, liba, signals}: RenderParams<Props>
         currentFilter.set(filterValue)
     }
 
-    const title = liba.create('h2', {
+    liba.create('h2', {
         children: [props.todolist.title]
     });
-    element.append(title);
 
-    const filterButtons = liba.create(FilterComponent, {filterTasks})
-    element.append(filterButtons.element)
+    liba.create(FilterComponent, { // no element error
+        filterTasks
+    })
 
-    const removeButton = liba.create('button', {
+    liba.create('button', {
         children: ['Remove todolist'],
         onClick: () => props.removeTodolist(props.todolist.id)
     })
 
-    element.append(removeButton)
-
-    const addTaskForm = liba.create(AddItemFormComponent, {
+    liba.create(AddItemFormComponent, { // no element error
         createNewItem: createNewTask,
         item: Item.Task
     })
-    element.append(addTaskForm.element)
 
     console.log('Todolist re-render');
 
@@ -109,12 +104,11 @@ TodolistComponent.render = ({element, props, liba, signals}: RenderParams<Props>
         : tasks()
 
     filteredTasks.forEach((task: TaskEntity) => {
-        const taskInstance = liba.create(TaskComponent, {
+        liba.create(TaskComponent, { // no element error
                 task,
                 updateTask: updateTaskHandler,
                 removeTask
             },
             task.id);
-        element.append(taskInstance.element);
     });
 };

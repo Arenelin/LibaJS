@@ -13,6 +13,7 @@ import {
     createChildrenComponent,
     createHtmlElement
 } from "./utils";
+import {createHtmlElementInsideComponent} from "./utils/createHtmlElementInsideComponent.ts";
 
 let currentEffect: Effect = null;
 
@@ -30,7 +31,7 @@ export const Liba = {
         const signals: WritableSignal<any>[] = []
 
         const renderLiba: RenderLiba = {
-            create<P extends object, TagName extends HTMLTag>(ChildrenElement: ComponentFn<P> | TagName, props = {}, key?: string | number) {
+            create<P extends object, TName extends HTMLTag>(ChildrenElement: ComponentFn<P> | TName, props = {}, key?: string | number) {
                 if (typeof ChildrenElement === 'function') {
                     return createChildrenComponent({
                         ComponentFunction: ChildrenElement,
@@ -39,7 +40,7 @@ export const Liba = {
                         key
                     })
                 } else {
-                    return createHtmlElement(ChildrenElement, props)
+                    return createHtmlElement(ChildrenElement, props, componentInstance)
                 }
             },
             refresh() {
@@ -54,8 +55,14 @@ export const Liba = {
                 })
             }
         }
+        let currentMainHTMLElementOfComponent = null;
 
         const componentLiba: ComponentLiba = {
+            createElement<TName extends HTMLTag>(tagName: TName, props = {}) {
+                const mainHTMLElementOfComponent = createHtmlElementInsideComponent(tagName, props)
+                currentMainHTMLElementOfComponent = mainHTMLElementOfComponent
+                return mainHTMLElementOfComponent // why return?
+            },
             refresh: renderLiba.refresh,
             signal<V>(initialState: V): WritableSignal<V> {
                 let currentValue: V = initialState;
@@ -115,6 +122,10 @@ export const Liba = {
             }
         };
         const componentInstance = ComponentFunction(props as P, {liba: componentLiba})
+        if (currentMainHTMLElementOfComponent) {
+            componentInstance.element = currentMainHTMLElementOfComponent
+        }
+        currentMainHTMLElementOfComponent = null;
         componentInstance.type = ComponentFunction
         componentInstance.props = props as P
         componentInstance.refresh = componentLiba.refresh

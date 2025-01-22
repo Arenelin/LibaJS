@@ -13,17 +13,16 @@ type UpdatedTaskFields = {
 }
 
 export const TaskComponent = ({}, {liba}: ComponentLibaParam) => {
-    const element = document.createElement('div')
+    liba.createElement('div')
     console.log('Task mount')
-    console.log(liba)
 
-    return {
-        element
-    }
+    return {}
 }
 
-TaskComponent.render = ({element, props, liba}: RenderParams<Props>) => {
-    element.append(props.task.title)
+TaskComponent.render = ({props, liba}: RenderParams<Props>) => {
+    liba.create('span', {
+        children: [props.task.title]
+    })
 
     const onChangeStatus = (e: Event) => {
         const checkboxHTMLElement = e.currentTarget as HTMLInputElement
@@ -35,7 +34,7 @@ TaskComponent.render = ({element, props, liba}: RenderParams<Props>) => {
         }))
     }
 
-    const checkbox = liba.create('input', {
+    liba.create('input', {
         type: 'checkbox',
         checked: props.task.status === TaskStatuses.Completed,
         onChange: onChangeStatus
@@ -51,13 +50,10 @@ TaskComponent.render = ({element, props, liba}: RenderParams<Props>) => {
         ...objectChange,
     })
 
-    element.append(checkbox)
-
-    const removeButton = liba.create('button', {
+    liba.create('button', {
         children: ['X'],
         onClick: () => props.removeTask(props.task.id)
     })
-    element.append(removeButton)
 
     console.log('Task re-render')
 }

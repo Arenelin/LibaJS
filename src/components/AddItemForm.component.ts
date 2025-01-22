@@ -7,15 +7,15 @@ type Props = {
 }
 
 export const AddItemFormComponent = ({}, {liba}: ComponentLibaParam) => {
-    const element = document.createElement('div');
+    liba.createElement('div');
     liba.signal('')
 
-    return {
-        element
-    };
+    console.log('AddItemForm mount');
+
+    return {};
 };
 
-AddItemFormComponent.render = ({element, signals, props, liba}: RenderParams<Props>) => {
+AddItemFormComponent.render = ({signals, props, liba}: RenderParams<Props>) => {
     const FIRST_SIGNAL_INDEX = 0
 
     console.log('AddItemForm re-render')
@@ -27,12 +27,10 @@ AddItemFormComponent.render = ({element, signals, props, liba}: RenderParams<Pro
         itemTitle.set(inputHTMLElement.value)
     }
 
-    const titleInput = liba.create('input', {
+    liba.create('input', {
         onChange: onChangeHandler,
         value: itemTitle()
     })
-
-    element.append(titleInput)
 
     const createItem = () => {
         if (itemTitle().length > 0 && itemTitle().trim()) {
@@ -40,10 +38,9 @@ AddItemFormComponent.render = ({element, signals, props, liba}: RenderParams<Pro
             itemTitle.set('')
         }
     }
-    const addButton = liba.create('button', {
+
+    liba.create('button', {
         children: [`Create new ${props.item}`],
         onClick: createItem
     })
-
-    element.append(addButton)
 };
