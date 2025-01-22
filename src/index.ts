@@ -4,6 +4,6 @@ import {Liba} from "./LibaJS";
 const rootElement = document.getElementById('root')
 const appInstance = Liba.create({ComponentFunction: AppComponent}) // no element error
 
-if (rootElement) {
+if (rootElement && appInstance.element) {
     rootElement.append(appInstance.element)
 }

@@ -1,14 +1,14 @@
-import {ComponentFn, ComponentInstance, CreateComponentParams} from "../types";
+import {ComponentFn, CreateComponentParams} from "../types";
 import {propsTheSame} from "./propsTheSame.ts";
 import {Liba} from "../LibaJS.ts";
 
-export function createChildrenComponent<P extends object>(
+export function createChildComponent<P extends object>(
     {
         ComponentFunction,
         props = {} as P,
         parentInstance,
         key
-    }: CreateComponentParams<P>): ComponentInstance<P> {
+    }: CreateComponentParams<P>): void {
 
     let alreadyExistedComponentInstance = parentInstance?.childrenComponents?.getItem(ComponentFunction, key)
 
@@ -21,8 +21,8 @@ export function createChildrenComponent<P extends object>(
                 alreadyExistedComponentInstance.refresh?.();
             }
             if (parentInstance) {
-                parentInstance.element.append(alreadyExistedComponentInstance.element)
-                return
+                parentInstance.element?.append(alreadyExistedComponentInstance.element)
+                return;
             }
         } else if (parentInstance && parentInstance.childrenComponents) {
             delete parentInstance.childrenComponents[parentInstance.childrenIndex]
@@ -30,7 +30,7 @@ export function createChildrenComponent<P extends object>(
     }
     const childrenInstance = Liba.create({ComponentFunction, props, parentInstance, key})
 
-    if (parentInstance) {
-        parentInstance.element.append(childrenInstance.element)
+    if (parentInstance && childrenInstance.element) {
+        parentInstance.element?.append(childrenInstance.element)
     }
 }

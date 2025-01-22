@@ -10,12 +10,13 @@ import {
     cleanComponent,
     ensureChildren,
     renderComponent,
-    createChildrenComponent,
-    createHtmlElement
+    createChildComponent,
+    createHtmlElement,
+    createChildHtmlElement
 } from "./utils";
-import {createHtmlElementInsideComponent} from "./utils/createHtmlElementInsideComponent.ts";
 
 let currentEffect: Effect = null;
+let currentMainHTMLElementOfComponent: HTMLElement | null = null;
 
 export const Liba = {
     create<P extends object>(
@@ -33,14 +34,15 @@ export const Liba = {
         const renderLiba: RenderLiba = {
             create<P extends object, TName extends HTMLTag>(ChildrenElement: ComponentFn<P> | TName, props = {}, key?: string | number) {
                 if (typeof ChildrenElement === 'function') {
-                    return createChildrenComponent({
+                    createChildComponent({
                         ComponentFunction: ChildrenElement,
                         props,
                         parentInstance: componentInstance,
                         key
                     })
+                    return;
                 } else {
-                    return createHtmlElement(ChildrenElement, props, componentInstance)
+                    return createChildHtmlElement(ChildrenElement, props, componentInstance)
                 }
             },
             refresh() {
@@ -55,13 +57,11 @@ export const Liba = {
                 })
             }
         }
-        let currentMainHTMLElementOfComponent = null;
+
 
         const componentLiba: ComponentLiba = {
             createElement<TName extends HTMLTag>(tagName: TName, props = {}) {
-                const mainHTMLElementOfComponent = createHtmlElementInsideComponent(tagName, props)
-                currentMainHTMLElementOfComponent = mainHTMLElementOfComponent
-                return mainHTMLElementOfComponent // why return?
+                currentMainHTMLElementOfComponent = createHtmlElement(tagName, props)
             },
             refresh: renderLiba.refresh,
             signal<V>(initialState: V): WritableSignal<V> {

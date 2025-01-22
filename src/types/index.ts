@@ -1,12 +1,13 @@
 import {CacheManager} from "../children-cache-manager.ts";
 // liba types
+
 export type ComponentFn<P extends object = {}> = {
     (props: P, {liba}: ComponentLibaParam): ComponentInstance<P>
     render: (params: RenderParams<P>) => void
 }
 
 export type ComponentInstance<P extends object = {}> = {
-    element: HTMLElement
+    element?: HTMLElement
     props?: P
     cleanup?: () => void
     type?: ComponentFn<P>
@@ -16,7 +17,7 @@ export type ComponentInstance<P extends object = {}> = {
 }
 
 export type RenderParams<P extends object = {}> = {
-    element: HTMLElement
+    element?: HTMLElement
     props: P
     liba: RenderLiba
     statesWithWrappers: [LocalState<any>, Dispatch<SetStateAction<any>>][]
@@ -33,7 +34,7 @@ export type LocalState<S> = {
 }
 
 export type ComponentLiba = {
-    createElement: <TName extends HTMLTag>(tagName: TName, props?: CreateHTMLElementProps) => HTMLElementTagNameMap[TName]
+    createElement: <TName extends HTMLTag>(tagName: TName, props?: CreateHTMLElementProps) => void
     refresh: () => void
     signal: <V>(initialState: V) => WritableSignal<V>
     computed: <V>(fn: () => V) => () => V
@@ -51,7 +52,7 @@ export type RenderLiba = {
         ComponentFunction: ComponentFn<P>,
         props?: P,
         key?: string | number
-    ): ComponentInstance<P>
+    ): void
 
     create<TName extends HTMLTag>(
         tagName: TName,
