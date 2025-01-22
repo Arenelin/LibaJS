@@ -1,7 +1,6 @@
 import {ComponentLibaParam, Option, RenderParams, WritableSignal} from "types";
-import {CounterComponent, TodolistsComponent} from "./components";
+import {CounterComponent, SelectComponent, TodolistsComponent} from "./components";
 import {CurrentPage, EnumCurrentPage} from "./enums";
-import {SelectComponent} from "./components/Select.ts";
 
 export const AppComponent = ({}, {liba}: ComponentLibaParam) => {
     liba.createElement('div');
@@ -18,16 +17,15 @@ AppComponent.render = ({signals, liba}: RenderParams) => {
     const currentPageState = signals[FIRST_SIGNAL_INDEX] as WritableSignal<EnumCurrentPage>
 
     const options: Option[] = [
-        {value: CurrentPage.Counter, title: 'Counter page'},
         {value: CurrentPage.Todolists, title: 'Todolist page'},
+        {value: CurrentPage.Counter, title: 'Counter page'},
     ]
 
     const onChangeCurrentPage = (e: Event) => {
         const selectHTMLElement = e.currentTarget as HTMLSelectElement;
         currentPageState.set(selectHTMLElement.value as EnumCurrentPage)
     };
-
-    liba.create(SelectComponent, { // no element error
+    liba.create(SelectComponent, {
         options,
         value: currentPageState(),
         onChange: onChangeCurrentPage
@@ -37,11 +35,11 @@ AppComponent.render = ({signals, liba}: RenderParams) => {
 
     switch (currentPageState()) {
         case CurrentPage.Counter: {
-            liba.create(CounterComponent); // no element error
+            liba.create(CounterComponent);
             break;
         }
         case CurrentPage.Todolists: {
-            liba.create(TodolistsComponent); // no element error
+            liba.create(TodolistsComponent);
             break;
         }
     }

@@ -1,8 +1,7 @@
 import {ComponentLibaParam, RenderParams, WritableSignal} from "../types";
-import {TodolistComponent} from "./Todolist.component.ts";
-import {AddItemFormComponent} from "./AddItemForm.component.ts";
 import {createTodolist, deleteTodolist, getTodolists, TodolistEntity} from "../api";
 import {Item} from "../enums";
+import {AddItemFormComponent, TodolistComponent} from "components";
 
 export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
     liba.createElement('div');
@@ -43,13 +42,13 @@ TodolistsComponent.render = ({liba, signals}: RenderParams) => {
         }
     }
 
-    liba.create(AddItemFormComponent, { // no element error
+    liba.create(AddItemFormComponent, {
         createNewItem: createNewTodolist,
         item: Item.Todolist
     })
 
     todolists().forEach(todolist => {
-        liba.create(TodolistComponent, { // no element error
+        liba.create(TodolistComponent, {
                 todolist,
                 removeTodolist
             },

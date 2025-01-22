@@ -9,9 +9,7 @@ import {
 } from "../api";
 import {ComponentLibaParam, RenderParams, WritableSignal} from "../types";
 import {EnumTaskFilter, Item, TaskFilter, TaskStatuses} from "../enums";
-import {AddItemFormComponent} from "./AddItemForm.component.ts";
-import {FilterComponent} from "./Filter.component.ts";
-import {TaskComponent} from "./Task.component.ts";
+import {TaskComponent, FilterComponent, AddItemFormComponent} from "components";
 
 type Props = {
     todolist: TodolistEntity
@@ -81,7 +79,7 @@ TodolistComponent.render = ({props, liba, signals}: RenderParams<Props>) => {
         children: [props.todolist.title]
     });
 
-    liba.create(FilterComponent, { // no element error
+    liba.create(FilterComponent, {
         filterTasks
     })
 
@@ -90,7 +88,7 @@ TodolistComponent.render = ({props, liba, signals}: RenderParams<Props>) => {
         onClick: () => props.removeTodolist(props.todolist.id)
     })
 
-    liba.create(AddItemFormComponent, { // no element error
+    liba.create(AddItemFormComponent, {
         createNewItem: createNewTask,
         item: Item.Task
     })
@@ -104,7 +102,7 @@ TodolistComponent.render = ({props, liba, signals}: RenderParams<Props>) => {
         : tasks()
 
     filteredTasks.forEach((task: TaskEntity) => {
-        liba.create(TaskComponent, { // no element error
+        liba.create(TaskComponent, {
                 task,
                 updateTask: updateTaskHandler,
                 removeTask
