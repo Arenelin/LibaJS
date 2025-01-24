@@ -9,7 +9,7 @@ import {
 } from "../api";
 import {ComponentLibaParam, RenderParams, WritableSignal} from "../types";
 import {EnumTaskFilter, Item, TaskFilter, TaskStatuses} from "../enums";
-import {TaskComponent, FilterComponent, AddItemFormComponent} from "components";
+import {TaskComponent, FilterComponent, AddItemFormComponent} from "../components";
 
 type Props = {
     todolist: TodolistEntity

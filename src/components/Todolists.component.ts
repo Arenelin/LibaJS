@@ -1,7 +1,7 @@
 import {ComponentLibaParam, RenderParams, WritableSignal} from "../types";
 import {createTodolist, deleteTodolist, getTodolists, TodolistEntity} from "../api";
 import {Item} from "../enums";
-import {AddItemFormComponent, TodolistComponent} from "components";
+import {AddItemFormComponent, TodolistComponent} from "../components";
 
 export const TodolistsComponent = ({}, {liba}: ComponentLibaParam) => {
     liba.createElement('div');

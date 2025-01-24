@@ -16,7 +16,7 @@ import {
 } from "./utils";
 
 let currentEffect: Effect = null;
-let currentMainHTMLElementOfComponent: HTMLElement | null = null;
+let rootHTMLElementOfComponent: HTMLElement | null = null;
 
 export const Liba = {
     create<P extends object>(
@@ -61,7 +61,7 @@ export const Liba = {
 
         const componentLiba: ComponentLiba = {
             createElement<TName extends HTMLTag>(tagName: TName, props = {}) {
-                currentMainHTMLElementOfComponent = createHtmlElement(tagName, props)
+                rootHTMLElementOfComponent = createHtmlElement(tagName, props)
             },
             refresh: renderLiba.refresh,
             signal<V>(initialState: V): WritableSignal<V> {
@@ -122,10 +122,13 @@ export const Liba = {
             }
         };
         const componentInstance = ComponentFunction(props as P, {liba: componentLiba})
-        if (currentMainHTMLElementOfComponent) {
-            componentInstance.element = currentMainHTMLElementOfComponent
+        if (rootHTMLElementOfComponent) {
+            componentInstance.element = rootHTMLElementOfComponent
         }
-        currentMainHTMLElementOfComponent = null;
+        // else if (rootHTMLElementOfComponent === null) {
+        //     throw new Error('')
+        // } check App component
+        rootHTMLElementOfComponent = null;
         componentInstance.type = ComponentFunction
         componentInstance.props = props as P
         componentInstance.refresh = componentLiba.refresh
